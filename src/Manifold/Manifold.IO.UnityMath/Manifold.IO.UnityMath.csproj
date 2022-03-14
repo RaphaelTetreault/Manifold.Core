@@ -7,9 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\Unity.Mathematics\src\Unity.Mathematics\Unity.Mathematics.csproj" />
     <ProjectReference Include="..\Manifold.IO\Manifold.IO.csproj" />
-    <ProjectReference Include="..\Manifold\Manifold.csproj" />
-    <ProjectReference Include="..\Unity.Mathematics\src\Unity.Mathematics\Unity.Mathematics.csproj" />
   </ItemGroup>
 
 </Project>
