@@ -6,4 +6,16 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <Compile Remove="Manifold.IO.UnityMath\**" />
+    <Compile Remove="Manifold.IO\**" />
+    <Compile Remove="Manifold.Spline\**" />
+    <EmbeddedResource Remove="Manifold.IO.UnityMath\**" />
+    <EmbeddedResource Remove="Manifold.IO\**" />
+    <EmbeddedResource Remove="Manifold.Spline\**" />
+    <None Remove="Manifold.IO.UnityMath\**" />
+    <None Remove="Manifold.IO\**" />
+    <None Remove="Manifold.Spline\**" />
+  </ItemGroup>
+
 </Project>
