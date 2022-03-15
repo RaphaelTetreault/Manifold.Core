@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿using System.Text;
 
 namespace Manifold.IO
 {
@@ -17,15 +15,12 @@ namespace Manifold.IO
         // CONSTANTS
         public const byte nullTerminator = 0x00;
 
-        // METADATA
-        private AddressRange addressRange;
-
-
         // FIELDS
-        public string value = string.Empty;
+        private static readonly List<byte> buffer = new List<byte>(64);
+        private string value;
 
 
-        //
+        // CONSTRUCTORS
         public CString()
         {
             value = string.Empty;
@@ -39,20 +34,16 @@ namespace Manifold.IO
 
 
         // PROPERTIES
-        public AddressRange AddressRange
-        {
-            get => addressRange;
-            set => addressRange = value;
-        }
-        public int Length => value.Length;
+        public AddressRange AddressRange { get; set; }
+        public int Length => Value.Length;
         public abstract Encoding Encoding { get; }
+        public string Value { get => value; set => this.value = value; }
 
 
         // METHODS
         public static string ReadCString(BinaryReader reader, Encoding encoding)
         {
-            var bytes = new System.Collections.Generic.List<byte>();
-
+            buffer.Clear();
             while (true)
             {
                 var @byte = reader.ReadByte();
@@ -61,10 +52,9 @@ namespace Manifold.IO
                 if (@byte is nullTerminator)
                     break;
 
-                bytes.Add(@byte);
+                buffer.Add(@byte);
             }
-
-            var str = encoding.GetString(bytes.ToArray());
+            var str = encoding.GetString(buffer.ToArray());
             return str;
         }
 
@@ -79,7 +69,7 @@ namespace Manifold.IO
         {
             this.RecordStartAddress(reader);
             {
-                value = ReadCString(reader, Encoding);
+                Value = ReadCString(reader, Encoding);
             }
             this.RecordEndAddress(reader);
         }
@@ -88,31 +78,24 @@ namespace Manifold.IO
         {
             this.RecordStartAddress(writer);
             {
-                WriteCString(writer, value, Encoding);
+                WriteCString(writer, Value, Encoding);
             }
             this.RecordEndAddress(writer);
         }
 
 
-        public static implicit operator string(CString str)
-        {
-            return str.value;
-        }
+        public static implicit operator string(CString cstr) => cstr.Value;
 
-        public static implicit operator CString(string str)
-        {
-            return str;
-        }
+        public static implicit operator CString(string str) => str;
+        public sealed override string ToString() => value;
 
-        public sealed override string ToString()
+        public bool Equals(CString? other)
         {
-            return value;
-        }
+            if (other is null)
+                return false;
 
-        public bool Equals(CString other)
-        {
             // Compares strings
-            bool isSameValue = value == other.value;
+            bool isSameValue = Value == other.Value;
             return isSameValue;
         }
     }

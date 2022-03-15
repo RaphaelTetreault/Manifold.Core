@@ -23,8 +23,6 @@ namespace Manifold.IO
         public const int SizeofDecimal = 16;
 
         // FIELDS
-        private static readonly Stack<Endianness> EndianessStack = new Stack<Endianness>();
-
         private static Func<BinaryReader, ushort> fReadUInt16 = RequiresSwapEndianness ? ReadUInt16SwapEndianness : ReadUInt16SameEndianness;
         private static Func<BinaryReader, uint> fReadUInt32 = RequiresSwapEndianness ? ReadUInt32SwapEndianness : ReadUInt32SameEndianness;
         private static Func<BinaryReader, ulong> fReadUInt64 = RequiresSwapEndianness ? ReadUInt64SwapEndianness : ReadUInt64SameEndianness;
@@ -40,8 +38,10 @@ namespace Manifold.IO
         private static Action<BinaryWriter, short> fWriteInt16 = RequiresSwapEndianness ? WriteInt16SwapEndianness : WriteInt16SameEndianness;
         private static Action<BinaryWriter, int> fWriteInt32 = RequiresSwapEndianness ? WriteInt32SwapEndianness : WriteInt32SameEndianness;
         private static Action<BinaryWriter, long> fWriteInt64 = RequiresSwapEndianness ? WriteInt64SwapEndianness : WriteInt64SameEndianness;
+        private static Action<BinaryWriter, Half> fWriteHalf = RequiresSwapEndianness ? WriteHalfSwapEndianness : WriteHalfSameEndianness;
         private static Action<BinaryWriter, float> fWriteFloat = RequiresSwapEndianness ? WriteFloatSwapEndianness : WriteFloatSameEndianness;
         private static Action<BinaryWriter, double> fWriteDouble = RequiresSwapEndianness ? WriteDoubleSwapEndianness : WriteDoubleSameEndianness;
+        private static Action<BinaryWriter, decimal> fWriteDecimal = RequiresSwapEndianness ? WriteDecimalSwapEndianness : WriteDecimalSameEndianness;
 
         private static void SetFunctionEndianness()
         {
@@ -65,8 +65,10 @@ namespace Manifold.IO
                 fWriteUInt16 = WriteUInt16SwapEndianness;
                 fWriteUInt32 = WriteUInt32SwapEndianness;
                 fWriteUInt64 = WriteUInt64SwapEndianness;
+                fWriteHalf = WriteHalfSwapEndianness;
                 fWriteFloat = WriteFloatSwapEndianness;
                 fWriteDouble = WriteDoubleSwapEndianness;
+                fWriteDecimal = WriteDecimalSwapEndianness;
             }
             else
             {
@@ -87,8 +89,10 @@ namespace Manifold.IO
                 fWriteUInt16 = WriteUInt16SameEndianness;
                 fWriteUInt32 = WriteUInt32SameEndianness;
                 fWriteUInt64 = WriteUInt64SameEndianness;
+                fWriteHalf = WriteHalfSameEndianness;
                 fWriteFloat = WriteFloatSameEndianness;
                 fWriteDouble = WriteDoubleSameEndianness;
+                fWriteDecimal = WriteDecimalSameEndianness;
             }
         }
 
@@ -102,7 +106,7 @@ namespace Manifold.IO
         /// <summary>
         /// The current endianness used for read/write operations
         /// </summary>
-        public static Endianness Endianness { get; set; } = Endianness.BigEndian;
+        public static Endianness Endianness { get; private set; } = Endianness.BigEndian;
 
         /// <summary>
         /// Returns true if Endianness is Little Endian
@@ -117,40 +121,15 @@ namespace Manifold.IO
         // METHODS
 
         /// <summary>
-        /// Pops the last pushed endianness
+        /// 
         /// </summary>
-        public static void PopEndianness()
-        {
-            var endianness = EndianessStack.Pop();
-
-            // Figure out if we need to change the function pointers
-            bool requiresFunctionChange = endianness != Endianness;
-
-            // Set active state to call value
-            Endianness = endianness;
-
-            // If we need to change functions, change them
-            if (requiresFunctionChange)
-            {
-                SetFunctionEndianness();
-            }
-        }
-
-        /// <summary>
-        /// Pushes an endianness to a private stack. Subsequent calls to read
-        /// or write will use this endianness.
-        /// </summary>
-        /// <param name="isLittleEndian"></param>
-        public static void PushEndianness(Endianness endianness)
+        /// <param name="endianness"></param>
+        public static void SetEndianness(Endianness endianness)
         {
             // Figure out if we need to change the function pointers
             bool requiresFunctionChange = endianness != Endianness;
-
-            // Push active state to stack
-            EndianessStack.Push(Endianness);
             // Set active state to call value
             Endianness = endianness;
-
             // If we need to change functions, change them
             if (requiresFunctionChange)
             {
@@ -185,12 +164,12 @@ namespace Manifold.IO
         {
             return fReadInt16.Invoke(binaryReader);
         }
-        private static short ReadInt16SameEndianness(BinaryReader binaryReader)
+        internal static short ReadInt16SameEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofInt16);
             return BitConverter.ToInt16(bytes, 0);
         }
-        private static short ReadInt16SwapEndianness(BinaryReader binaryReader)
+        internal static short ReadInt16SwapEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofInt16);
             Array.Reverse(bytes);
@@ -203,12 +182,12 @@ namespace Manifold.IO
         {
             return fReadUInt16.Invoke(binaryReader);
         }
-        private static ushort ReadUInt16SameEndianness(BinaryReader binaryReader)
+        internal static ushort ReadUInt16SameEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofUint16);
             return BitConverter.ToUInt16(bytes, 0);
         }
-        private static ushort ReadUInt16SwapEndianness(BinaryReader binaryReader)
+        internal static ushort ReadUInt16SwapEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofUint16);
             Array.Reverse(bytes);
@@ -221,12 +200,12 @@ namespace Manifold.IO
         {
             return fReadInt32.Invoke(binaryReader);
         }
-        private static int ReadInt32SameEndianness(BinaryReader binaryReader)
+        internal static int ReadInt32SameEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofInt32);
             return BitConverter.ToInt32(bytes, 0);
         }
-        private static int ReadInt32SwapEndianness(BinaryReader binaryReader)
+        internal static int ReadInt32SwapEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofInt32);
             Array.Reverse(bytes);
@@ -239,12 +218,12 @@ namespace Manifold.IO
         {
             return fReadUInt32.Invoke(binaryReader);
         }
-        private static uint ReadUInt32SameEndianness(BinaryReader binaryReader)
+        internal static uint ReadUInt32SameEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofUint32);
             return BitConverter.ToUInt32(bytes, 0);
         }
-        private static uint ReadUInt32SwapEndianness(BinaryReader binaryReader)
+        internal static uint ReadUInt32SwapEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofUint32);
             Array.Reverse(bytes);
@@ -257,13 +236,13 @@ namespace Manifold.IO
         {
             return fReadInt64.Invoke(binaryReader);
         }
-        private static long ReadInt64SameEndianness(BinaryReader binaryReader)
+        internal static long ReadInt64SameEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofInt64);
             Array.Reverse(bytes);
             return BitConverter.ToInt64(bytes, 0);
         }
-        private static long ReadInt64SwapEndianness(BinaryReader binaryReader)
+        internal static long ReadInt64SwapEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofInt64);
             Array.Reverse(bytes);
@@ -276,12 +255,12 @@ namespace Manifold.IO
         {
             return fReadUInt64.Invoke(binaryReader);
         }
-        private static ulong ReadUInt64SameEndianness(BinaryReader binaryReader)
+        internal static ulong ReadUInt64SameEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofUint64);
             return BitConverter.ToUInt64(bytes, 0);
         }
-        private static ulong ReadUInt64SwapEndianness(BinaryReader binaryReader)
+        internal static ulong ReadUInt64SwapEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofUint64);
             Array.Reverse(bytes);
@@ -294,12 +273,12 @@ namespace Manifold.IO
         {
             return fReadFloat.Invoke(binaryReader);
         }
-        private static float ReadFloatSameEndianness(BinaryReader binaryReader)
+        internal static float ReadFloatSameEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofFloat);
             return BitConverter.ToSingle(bytes, 0);
         }
-        private static float ReadFloatSwapEndianness(BinaryReader binaryReader)
+        internal static float ReadFloatSwapEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofFloat);
             Array.Reverse(bytes);
@@ -312,12 +291,12 @@ namespace Manifold.IO
         {
             return fReadDouble.Invoke(binaryReader);
         }
-        private static double ReadDoubleSameEndianness(BinaryReader binaryReader)
+        internal static double ReadDoubleSameEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofDouble);
             return BitConverter.ToDouble(bytes, 0);
         }
-        private static double ReadDoubleSwapEndianness(BinaryReader binaryReader)
+        internal static double ReadDoubleSwapEndianness(BinaryReader binaryReader)
         {
             byte[] bytes = binaryReader.ReadBytes(SizeofDouble);
             Array.Reverse(bytes);
@@ -723,6 +702,22 @@ namespace Manifold.IO
             writer.Write(bytes);
         }
 
+        public static void Write(BinaryWriter writer, Half value)
+        {
+            fWriteHalf.Invoke(writer, value);
+        }
+        public static void WriteHalfSameEndianness(BinaryWriter writer, Half value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            writer.Write(bytes);
+        }
+        public static void WriteHalfSwapEndianness(BinaryWriter writer, Half value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            Array.Reverse(bytes);
+            writer.Write(bytes);
+        }
+
         public static void Write(BinaryWriter writer, float value)
         {
             fWriteFloat.Invoke(writer, value);
@@ -755,6 +750,34 @@ namespace Manifold.IO
             writer.Write(bytes);
         }
 
+        public static void Write(BinaryWriter writer, decimal value)
+        {
+            fWriteDecimal.Invoke(writer, value);
+        }
+        public static void WriteDecimalSameEndianness(BinaryWriter writer, decimal value)
+        {
+            var ints = decimal.GetBits(value);
+            var decimalBytes = new byte[16];
+            for (int i = 0; i < 4; i++)
+            {
+                var bytes = BitConverter.GetBytes(ints[i]);
+                bytes.CopyTo(decimalBytes, i * 4);
+            }    
+            writer.Write(decimalBytes);
+        }
+        public static void WriteDecimalSwapEndianness(BinaryWriter writer, decimal value)
+        {
+            var ints = decimal.GetBits(value);
+            var decimalBytes = new byte[16];
+            for (int i = 0; i < 4; i++)
+            {
+                var bytes = BitConverter.GetBytes(ints[i]);
+                Array.Reverse(bytes);
+                bytes.CopyTo(decimalBytes, i * 4);
+            }
+            writer.Write(decimalBytes);
+        }
+
         public static void Write(BinaryWriter writer, string value, Encoding encoding, bool writeLengthBytes)
         {
             byte[] bytes = encoding.GetBytes(value);
@@ -772,23 +795,22 @@ namespace Manifold.IO
 
         public static void Write<TEnum>(BinaryWriter writer, TEnum value, byte _ = 0) where TEnum : Enum
         {
-            var type = Enum.GetUnderlyingType(typeof(TEnum));
-            switch (type)
+            switch (value.GetTypeCode())
             {
                 // Ordered by my best guess as to which is most common
                 // int is the default backing type
-                case Type _ when type == typeof(int): Write(writer, (int)(object)value); break;
+                case TypeCode.Int32: Write(writer, (int)(object)value); break;
                 // I often override the backing type to not have negatives
-                case Type _ when type == typeof(uint): Write(writer, (uint)(object)value); break;
+                case TypeCode.UInt32: Write(writer, (uint)(object)value); break;
                 // byte and ushort are smaller/compressed enums (also no negatives)
-                case Type _ when type == typeof(byte): Write(writer, (byte)(object)value); break;
-                case Type _ when type == typeof(ushort): Write(writer, (ushort)(object)value); break;
+                case TypeCode.Byte: Write(writer, (byte)(object)value); break;
+                case TypeCode.UInt16: Write(writer, (ushort)(object)value); break;
                 // Unlikely but perhaps userful to have 64 bits to work with
-                case Type _ when type == typeof(ulong): Write(writer, (ulong)(object)value); break;
+                case TypeCode.UInt64: Write(writer, (ulong)(object)value); break;
                 // These are unordered: I know I don't use them as backing types
-                case Type _ when type == typeof(sbyte): Write(writer, (sbyte)(object)value); break;
-                case Type _ when type == typeof(short): Write(writer, (short)(object)value); break;
-                case Type _ when type == typeof(long): Write(writer, (long)(object)value); break;
+                case TypeCode.SByte: Write(writer, (sbyte)(object)value); break;
+                case TypeCode.Int16: Write(writer, (short)(object)value); break;
+                case TypeCode.Int64: Write(writer, (long)(object)value); break;
 
                 default: throw new NotImplementedException("Unsupported Enum backing type used!");
             }
