@@ -65,17 +65,14 @@ namespace Manifold.IO
                 WriteFlags(writer, (TEnum)(object)sbyte.MaxValue);
         }
 
-        public static void WriteFlags<TEnum>(this StreamWriter writer, TEnum values)
+        public static void WriteFlags<TEnum>(this StreamWriter writer, TEnum @enum)
             where TEnum : struct, Enum
         {
-            var flags = AnalyzerUtility.GetFlags(values).Reverse();
-
+            var flags = @enum.GetFlags(true).Reverse();
             foreach (var flag in flags)
             {
-                if (flag != null)
-                    writer.WriteNextCol(flag);
-                else
-                    writer.WriteNextCol(string.Empty);
+                object value = flag is null ? string.Empty : flag; 
+                writer.WriteNextCol(value);
             }
         }
 

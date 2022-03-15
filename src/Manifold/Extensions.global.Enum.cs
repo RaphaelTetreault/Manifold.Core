@@ -1,27 +1,52 @@
-﻿// Source: https://www.codingame.com/playgrounds/2487/c---how-to-display-friendly-names-for-enumerations
-
-using System;
-using System.ComponentModel;
-using System.Linq;
+﻿using System.ComponentModel;
 using System.Reflection;
 
 namespace Manifold
 {
     public static class EnumExtensions
     {
-        public static string GetDescription(this Enum GenericEnum)
+        /// <summary>
+        /// Gets the DescriptionAttribute string of the provided enum.
+        /// </summary>
+        /// <param name="enum">The enum value to retrieve the description from.</param>
+        /// <returns>
+        /// Returns the DescriptionAttribute string if present, otherwise returns
+        /// enum.ToString().
+        /// </returns>
+        /// <remarks>
+        /// Resource: <see href="https://www.codingame.com/playgrounds/2487/c---how-to-display-friendly-names-for-enumerations"/>
+        /// </remarks>
+        public static string GetDescription(this Enum @enum)
         {
-            Type genericEnumType = GenericEnum.GetType();
-            MemberInfo[] memberInfo = genericEnumType.GetMember(GenericEnum.ToString());
-            if ((memberInfo != null && memberInfo.Length > 0))
+            Type enumType = @enum.GetType();
+            MemberInfo[] memberInfo = enumType.GetMember(@enum.ToString());
+            if (!memberInfo.IsNullOrEmpty())
             {
-                var _Attribs = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
-                if ((_Attribs != null && _Attribs.Count() > 0))
+                var attributes = memberInfo[0].GetCustomAttributes(typeof(DescriptionAttribute), false);
+                if (attributes.IsNullOrEmpty())
                 {
-                    return ((DescriptionAttribute)_Attribs.ElementAt(0)).Description;
+                    return ((DescriptionAttribute)attributes.ElementAt(0)).Description;
                 }
             }
-            return GenericEnum.ToString();
+            return @enum.ToString();
+        }
+
+        /// <summary>
+        /// Gets an enumerable collection of flags from the specified enum.
+        /// </summary>
+        /// <param name="enum">The enum value to retrieve the flags from.</param>
+        /// <param name="returnNull">Is true, returns null if flag is not present in <paramref name="enum"/>.</param>
+        /// <returns>
+        /// Returns an enumerable collection of the specified enum, on for each of flag present.
+        /// If flag is not present and <paramref name="returnNull"/> is true, a null is returned instead.
+        /// </returns>
+        public static IEnumerable<Enum?> GetFlags(this Enum @enum, bool returnNull)
+        {
+            foreach (Enum flag in Enum.GetValues(@enum.GetType()))
+                if (@enum.HasFlag(flag))
+                    yield return flag;
+                else if (returnNull)
+                    yield return null;
         }
     }
 }

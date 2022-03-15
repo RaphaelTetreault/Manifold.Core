@@ -1,23 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-
-namespace Manifold.IO
+﻿namespace Manifold.IO
 {
     public static class AnalyzerUtility
     {
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public static string GetFileTimestamp()
         {
             return DateTime.Now.ToString("(yyyy-MM-dd) (HH-mm-ss)");
         }
 
-        public static string GetAnalysisFilePathTSV(string outputPath, string fileName)
-        {
-            var time = GetFileTimestamp();
-            var analysisFilePath = Path.Combine(outputPath, $"{time} {fileName}.tsv");
-            return analysisFilePath;
-        }
-
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="filePath"></param>
+        /// <param name="mode"></param>
+        /// <param name="access"></param>
+        /// <param name="share"></param>
+        /// <returns></returns>
         public static StreamWriter OpenWriter(
             string filePath,
             FileMode mode = FileMode.Create,
@@ -28,15 +29,6 @@ namespace Manifold.IO
             var fileStream = File.Open(filePath, mode, access, share);
             var writer = new StreamWriter(fileStream);
             return writer;
-        }
-
-        public static IEnumerable<Enum> GetFlags(Enum input)
-        {
-            foreach (Enum value in Enum.GetValues(input.GetType()))
-                if (input.HasFlag(value))
-                    yield return value;
-                else
-                    yield return null;
         }
 
     }
