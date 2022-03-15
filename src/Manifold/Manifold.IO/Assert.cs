@@ -1,14 +1,45 @@
-﻿using Manifold;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections;
+using System.Diagnostics;
 
 namespace Manifold.IO
 {
-    public static class AssertBin
+    public static class Assert
     {
+        public class AssertException : Exception
+        {
+            public AssertException() { }
+            public AssertException(string message) : base(message) { }
+            public AssertException(string message, Exception inner) : base(message, inner) { }
+        }
+
+
+        public static void IsTrue(bool value, string message = null)
+        {
+            if (value)
+                return;
+
+            if (string.IsNullOrEmpty(message))
+            {
+                throw new AssertException();
+            }
+            else
+            {
+                throw new AssertException(message);
+            }
+        }
+
+        public static void IsFalse(bool value, string message = null)
+            => IsTrue(!value, message);
+
+        public static void ContainsNoNulls<T>(T ienumerable)
+            where T : IEnumerable
+        {
+            foreach (var item in ienumerable)
+            {
+                IsTrue(item != null, $"Value null found in ienumerable type {nameof(T)}!");
+            }
+        }
+
 
         public static void ValidateReferencePointer(object reference, IPointer pointer)
         {
@@ -20,7 +51,7 @@ namespace Manifold.IO
                 ? $"Reference is null but pointer is not! Ptr(0x{pointer.Address:x8})"
                 : $"Reference exists but pointer is null!";
 
-            Assert.IsFalse(invalidState, msg);
+            IsFalse(invalidState, msg);
         }
 
 
@@ -35,7 +66,7 @@ namespace Manifold.IO
                 var refPtr = reference.GetPointer();
                 var isSamePointer = pointer.Address == refPtr.address;
                 const string msg = "Reference's pointer and supplied pointer do not match!";
-                Assert.IsTrue(isSamePointer, msg);
+                IsTrue(isSamePointer, msg);
             }
         }
 
@@ -49,7 +80,7 @@ namespace Manifold.IO
             {
                 var refPtr = reference[0].GetPointer();
                 var isSamePointer = pointer.address == refPtr.address;
-                Assert.IsTrue(isSamePointer);
+                IsTrue(isSamePointer);
             }
         }
 
