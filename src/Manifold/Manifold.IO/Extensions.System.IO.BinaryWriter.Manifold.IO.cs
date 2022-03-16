@@ -10,7 +10,7 @@ namespace Manifold.IO
         /// Positions underlying stream at end of stream.
         /// </summary>
         /// <param name="writer"></param>
-        public static void SeekEnd(this BinaryWriter writer)
+        public static void SeekEnd(this EndianBinaryWriter writer)
         {
             long endOfStream = writer.BaseStream.Length;
             writer.BaseStream.Seek(endOfStream, SeekOrigin.Begin);
@@ -20,7 +20,7 @@ namespace Manifold.IO
         /// Positions underlying stream at beginning of stream.
         /// </summary>
         /// <param name="writer"></param>
-        public static void SeekStart(this BinaryWriter writer)
+        public static void SeekStart(this EndianBinaryWriter writer)
         {
             writer.BaseStream.Seek(0, SeekOrigin.Begin);
         }
@@ -32,7 +32,7 @@ namespace Manifold.IO
         #region TODO: hacky comment code
 
         // Added the below extensions to help debug file outputs
-        public static void Comment(this BinaryWriter writer, string message, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void Comment(this EndianBinaryWriter writer, string message, bool doWrite, char padding = ' ', int alignment = 16)
         {
             // Allow option to write or not. Prevents a lot of if statements.
             if (!doWrite)
@@ -45,15 +45,15 @@ namespace Manifold.IO
             byte padByte = (byte)padding;
 
             writer.WriteAlignment(alignment, padByte);
-            writer.WriteX(bytes);
+            writer.Write(bytes);
             writer.WriteAlignment(alignment, padByte);
         }
-        public static void CommentType<T>(this BinaryWriter writer, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void CommentType<T>(this EndianBinaryWriter writer, bool doWrite, char padding = ' ', int alignment = 16)
             => Comment(writer, typeof(T).Name, doWrite, padding, alignment);
-        public static void CommentType<T>(this BinaryWriter writer, T _, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void CommentType<T>(this EndianBinaryWriter writer, T _, bool doWrite, char padding = ' ', int alignment = 16)
             => CommentType<T>(writer, doWrite, padding, alignment);
 
-        public static void CommentNewLine(this BinaryWriter writer, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void CommentNewLine(this EndianBinaryWriter writer, bool doWrite, char padding = ' ', int alignment = 16)
         {
             // Allow option to write or not. Prevents a lot of if statements.
             if (!doWrite)
@@ -63,9 +63,9 @@ namespace Manifold.IO
 
             writer.WriteAlignment(alignment, padByte);
             for (int i = 0; i < alignment; i++)
-                writer.WriteX(padByte);
+                writer.Write(padByte);
         }
-        public static void CommentAlign(this BinaryWriter writer, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void CommentAlign(this EndianBinaryWriter writer, bool doWrite, char padding = ' ', int alignment = 16)
         {
             // Allow option to write or not. Prevents a lot of if statements.
             if (!doWrite)
@@ -74,32 +74,32 @@ namespace Manifold.IO
             writer.WriteAlignment(alignment, (byte)padding);
         }
 
-        public static void CommentLineWide(this BinaryWriter writer, string lMsg, string rMsg, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void CommentLineWide(this EndianBinaryWriter writer, string lMsg, string rMsg, bool doWrite, char padding = ' ', int alignment = 16)
         {
             int lengthLeft = lMsg.Length;
             int lenghtRight = alignment - lengthLeft;
             var message = $"{lMsg}{rMsg.PadLeft(lenghtRight)}";
             Comment(writer, message, doWrite, padding, alignment);
         }
-        public static void CommentLineWide(this BinaryWriter writer, string lMsg, object rMsg, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void CommentLineWide(this EndianBinaryWriter writer, string lMsg, object rMsg, bool doWrite, char padding = ' ', int alignment = 16)
             => CommentLineWide(writer, lMsg, rMsg.ToString(), doWrite, padding, alignment);
 
-        public static void CommentIdx(this BinaryWriter writer, int index, bool doWrite, char padding = ' ', int alignment = 16, string format = "d")
+        public static void CommentIdx(this EndianBinaryWriter writer, int index, bool doWrite, char padding = ' ', int alignment = 16, string format = "d")
             => CommentLineWide(writer, "Index:", index.ToString(format), doWrite, padding, alignment);
 
-        public static void CommentCnt(this BinaryWriter writer, int count, bool doWrite, char padding = ' ', int alignment = 16, string format = "d")
+        public static void CommentCnt(this EndianBinaryWriter writer, int count, bool doWrite, char padding = ' ', int alignment = 16, string format = "d")
             => CommentLineWide(writer, "Count:", count.ToString(format), doWrite, padding, alignment);
 
-        public static void CommentPtr(this BinaryWriter writer, int address, bool doWrite, char padding = ' ', int alignment = 16, string format = "x8")
+        public static void CommentPtr(this EndianBinaryWriter writer, int address, bool doWrite, char padding = ' ', int alignment = 16, string format = "x8")
             => CommentLineWide(writer, "PtrAdr:", address.ToString(format), doWrite, padding, alignment);
 
-        //public static void CommentPtr(this BinaryWriter writer, IPointer pointer, bool doWrite, char padding = ' ', int alignment = 16)
+        //public static void CommentPtr(this EndianBinaryWriter writer, IPointer pointer, bool doWrite, char padding = ' ', int alignment = 16)
         //    => CommentPtr(writer, pointer.Address, doWrite, padding, alignment);
 
-        public static void CommentPtr(this BinaryWriter writer, AddressRange addresRange, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void CommentPtr(this EndianBinaryWriter writer, AddressRange addresRange, bool doWrite, char padding = ' ', int alignment = 16)
             => CommentPtr(writer, (int)addresRange.startAddress, doWrite, padding, alignment);
 
-        public static void CommentPtr(this BinaryWriter writer, ArrayPointer pointer, bool doWrite, char padding = ' ', int alignment = 16)
+        public static void CommentPtr(this EndianBinaryWriter writer, ArrayPointer pointer, bool doWrite, char padding = ' ', int alignment = 16)
         {
             // Allow option to write or not. Prevents a lot of if statements.
             if (!doWrite)
@@ -110,7 +110,7 @@ namespace Manifold.IO
             CommentCnt(writer, pointer.length, doWrite, padding, alignment);
         }
 
-        public static void InlineDesc<T>(this BinaryWriter writer, bool doWrite, Pointer pointer, T type, char padding = ' ', int alignment = 16)
+        public static void InlineDesc<T>(this EndianBinaryWriter writer, bool doWrite, Pointer pointer, T type, char padding = ' ', int alignment = 16)
         {
             if (!doWrite)
                 return;
@@ -130,7 +130,7 @@ namespace Manifold.IO
             CommentNewLine(writer, true, '-', alignment);
         }
 
-        public static void InlineDesc<T>(this BinaryWriter writer, bool doWrite, T type, char padding = ' ', int alignment = 16)
+        public static void InlineDesc<T>(this EndianBinaryWriter writer, bool doWrite, T type, char padding = ' ', int alignment = 16)
         {
             if (!doWrite)
                 return;
@@ -143,7 +143,7 @@ namespace Manifold.IO
             CommentNewLine(writer, true, '-', alignment);
         }
 
-        public static void InlineComment(this BinaryWriter writer, bool doWrite, params string[] comments)
+        public static void InlineComment(this EndianBinaryWriter writer, bool doWrite, params string[] comments)
         {
             if (!doWrite)
                 return;
@@ -159,7 +159,7 @@ namespace Manifold.IO
             CommentNewLine(writer, true, '-', kAlignment);
         }
 
-        public static void CommentDateAndCredits(this BinaryWriter writer, bool doWrite)
+        public static void CommentDateAndCredits(this EndianBinaryWriter writer, bool doWrite)
         {
             if (!doWrite)
                 return;
@@ -173,7 +173,7 @@ namespace Manifold.IO
             writer.CommentNewLine(true);
             writer.Comment("Manifold", true);
             writer.Comment("created by:", true);
-            writer.WriteX(new byte[] { 0x52, 0x61, 0x70, 0x68, 0x61, 0xeb, 0x6c, 0x54, 0xe9, 0x74, 0x72, 0x65, 0x61, 0x75, 0x6c, 0x74 } ); // RaphaëlTétreault
+            writer.Write(new byte[] { 0x52, 0x61, 0x70, 0x68, 0x61, 0xeb, 0x6c, 0x54, 0xe9, 0x74, 0x72, 0x65, 0x61, 0x75, 0x6c, 0x74 } ); // RaphaëlTétreault
             writer.Comment("aka StarkNebula", true);
             writer.CommentNewLine(true, '-');
             //writer.CommentNewLine(true);
@@ -186,7 +186,7 @@ namespace Manifold.IO
         /// </summary>
         /// <param name="reader">The writer to jump in.</param>
         /// <param name="pointer">The pointer to jump to.</param>
-        public static void JumpToAddress(this BinaryWriter writer, Pointer pointer)
+        public static void JumpToAddress(this EndianBinaryWriter writer, Pointer pointer)
         {
             writer.BaseStream.Seek(pointer.address, SeekOrigin.Begin);
         }
@@ -196,7 +196,7 @@ namespace Manifold.IO
         /// </summary>
         /// <param name="writer">The writer to jump in.</param>
         /// <param name="arrayPointer">The pointer to jump to.</param>
-        public static void JumpToAddress(this BinaryWriter writer, ArrayPointer arrayPointer)
+        public static void JumpToAddress(this EndianBinaryWriter writer, ArrayPointer arrayPointer)
         {
             writer.BaseStream.Seek(arrayPointer.address, SeekOrigin.Begin);
         }
@@ -208,7 +208,7 @@ namespace Manifold.IO
         /// <returns>
         /// A pointer pointing to the address of the <paramref name="writer"/>'s stream position.
         /// </returns>
-        public static Pointer GetPositionAsPointer(this BinaryWriter writer)
+        public static Pointer GetPositionAsPointer(this EndianBinaryWriter writer)
         {
             return new Pointer(writer.BaseStream.Position);
         }

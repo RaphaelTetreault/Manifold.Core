@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-namespace Manifold.IO
+﻿namespace Manifold.IO
 {
     /// <summary>
     /// Interface which enables types to define how it is serialized and 
@@ -12,12 +10,12 @@ namespace Manifold.IO
         /// Deserializes this type from a binary stream.
         /// </summary>
         /// <param name="reader">The binary reader to read from</param>
-        void Deserialize(BinaryReader reader);
+        void Deserialize(EndianBinaryReader reader);
 
         /// <summary>
         /// Serializes this type to a binary stream.
         /// </summary>
         /// <param name="writer">The binary writer to write to</param>
-        void Serialize(BinaryWriter writer);
+        void Serialize(EndianBinaryWriter writer);
     }
 }

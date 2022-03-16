@@ -74,35 +74,9 @@ namespace Manifold.IO
             byte[] bytes = encoding.GetBytes(value);
 
             if (writeLengthBytes)
-                WriteInt32.Invoke(bytes.Length);
+                Write(bytes.Length);
 
-            base.Write(bytes);
-        }
-        public void Write<TBinarySerializable>(TBinarySerializable value) where TBinarySerializable : IBinarySerializable
-        {
-            value.Serialize(this);
-        }
-        public void Write<TEnum>(TEnum value, byte _ = 0) where TEnum : Enum
-        {
-            switch (value.GetTypeCode())
-            {
-                // Ordered by my best guess as to which is most common
-                // int is the default backing type
-                case TypeCode.Int32: WriteInt32.Invoke((int)(object)value); break;
-                // I often override the backing type to not have negatives
-                case TypeCode.UInt32: WriteUInt32.Invoke((uint)(object)value); break;
-                // byte and ushort are smaller/compressed enums (also no negatives)
-                case TypeCode.Byte: base.Write((byte)(object)value); break;
-                case TypeCode.UInt16: WriteUInt16.Invoke((ushort)(object)value); break;
-                // Unlikely but perhaps userful to have 64 bits to work with
-                case TypeCode.UInt64: WriteUInt64.Invoke((ulong)(object)value); break;
-                // These are unordered: I know I don't use them as backing types
-                case TypeCode.SByte: base.Write((sbyte)(object)value); break;
-                case TypeCode.Int16: WriteInt16.Invoke((short)(object)value); break;
-                case TypeCode.Int64: WriteInt64.Invoke((long)(object)value); break;
-
-                default: throw new NotImplementedException("Unsupported Enum backing type used!");
-            }
+            Write(bytes);
         }
 
         // Write array values
@@ -113,6 +87,7 @@ namespace Manifold.IO
         public void Write(ushort[] value) => WriteArray(value, WriteUInt16);
         public void Write(uint[] value) => WriteArray(value, WriteUInt32);
         public void Write(ulong[] value) => WriteArray(value, WriteUInt64);
+        public void Write(sbyte[] value) => WriteArray(value, base.Write);
         public void Write(short[] value) => WriteArray(value, WriteInt16);
         public void Write(int[] value) => WriteArray(value, WriteInt32);
         public void Write(long[] value) => WriteArray(value, WriteInt64);
@@ -128,19 +103,6 @@ namespace Manifold.IO
             foreach (string str in value)
                 Write(str, encoding, true);
         }
-        public void Write<TBinarySerializable>(TBinarySerializable[] value) where TBinarySerializable : IBinarySerializable
-        {
-            foreach (var binarySerializable in value)
-                Write(binarySerializable);
-        }
-        public void Write<TEnum>(TEnum[] values, byte _ = 0) where TEnum : Enum
-        {
-            foreach (var @enum in values)
-                Write(@enum);
-        }
-
-
-
 
 
         internal void WriteUInt16SameEndianness(ushort value)
@@ -286,4 +248,56 @@ namespace Manifold.IO
 
 
     }
+
+    /// <summary>
+    /// The compiler cannot resolve which overload to use when the class itself has the generic methods.
+    /// To circumvent this, we can place the generic methods in a static class and use them like extensions.
+    /// When done this way, the compiler appears to fallback onto these methods properly.
+    /// </summary>
+    public static class EndianBinaryWriterCompilerWorkaround
+    {
+        public static void Write<TBinarySerializable>(this EndianBinaryWriter writer, TBinarySerializable value) where TBinarySerializable : IBinarySerializable
+        {
+            value.Serialize(writer);
+        }
+
+        public static void Write<TEnum>(this EndianBinaryWriter writer, TEnum value, byte _ = 0) where TEnum : Enum
+        {
+            switch (value.GetTypeCode())
+            {
+                // Ordered by my best guess as to which is most common
+                // int is the default backing type
+                case TypeCode.Int32: writer.Write((int)(object)value); break;
+                // I often override the backing type to not have negatives
+                case TypeCode.UInt32: writer.Write((uint)(object)value); break;
+                // byte and ushort are smaller/compressed enums (also no negatives)
+                case TypeCode.Byte: writer.Write((byte)(object)value); break;
+                case TypeCode.UInt16: writer.Write((ushort)(object)value); break;
+                // Unlikely but perhaps userful to have 64 bits to work with
+                case TypeCode.UInt64: writer.Write((ulong)(object)value); break;
+                // These are unordered: I know I don't use them as backing types
+                case TypeCode.SByte: writer.Write((sbyte)(object)value); break;
+                case TypeCode.Int16: writer.Write((short)(object)value); break;
+                case TypeCode.Int64: writer.Write((long)(object)value); break;
+
+                default: throw new NotImplementedException("Unsupported Enum backing type used!");
+            }
+        }
+
+        public static void Write<TBinarySerializable>(this EndianBinaryWriter writer, TBinarySerializable[] value)
+            where TBinarySerializable : IBinarySerializable
+        {
+            foreach (var binarySerializable in value)
+                writer.Write(binarySerializable);
+        }
+
+        public static void Write<TEnum>(this EndianBinaryWriter writer, TEnum[] values, byte _ = 0)
+            where TEnum : Enum
+        {
+            foreach (var @enum in values)
+                writer.Write(@enum);
+        }
+    }
+
+
 }

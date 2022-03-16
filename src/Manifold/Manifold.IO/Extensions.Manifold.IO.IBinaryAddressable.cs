@@ -11,11 +11,11 @@ namespace Manifold.IO
             binaryAddressable.AddressRange = addressRange;
         }
 
-        public static void RecordStartAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, BinaryReader reader)
+        public static void RecordStartAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, EndianBinaryReader reader)
             where TBinaryAddressable : IBinaryAddressable
             => RecordStartAddress(binaryAddressable, reader.BaseStream);
 
-        public static void RecordStartAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, BinaryWriter writer)
+        public static void RecordStartAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, EndianBinaryWriter writer)
             where TBinaryAddressable : IBinaryAddressable
             => RecordStartAddress(binaryAddressable, writer.BaseStream);
 
@@ -28,23 +28,23 @@ namespace Manifold.IO
             binaryAddressable.AddressRange = addressRange;
         }
 
-        public static void RecordEndAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, BinaryReader reader)
+        public static void RecordEndAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, EndianBinaryReader reader)
             where TBinaryAddressable : IBinaryAddressable
             => RecordEndAddress(binaryAddressable, reader.BaseStream);
 
-        public static void RecordEndAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, BinaryWriter writer)
+        public static void RecordEndAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, EndianBinaryWriter writer)
             where TBinaryAddressable : IBinaryAddressable
             => RecordEndAddress(binaryAddressable, writer.BaseStream);
 
 
-        public static void SetReaderToStartAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, BinaryReader reader)
+        public static void SetReaderToStartAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, EndianBinaryReader reader)
             where TBinaryAddressable : IBinaryAddressable
         {
             var address = binaryAddressable.AddressRange.startAddress;
             reader.BaseStream.Seek(address, SeekOrigin.Begin);
         }
 
-        public static void SetWriterToStartAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, BinaryWriter writer)
+        public static void SetWriterToStartAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, EndianBinaryWriter writer)
             where TBinaryAddressable : IBinaryAddressable
         {
             var address = binaryAddressable.AddressRange.startAddress;
@@ -52,14 +52,14 @@ namespace Manifold.IO
         }
 
 
-        public static void SetReaderToEndAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, BinaryReader reader)
+        public static void SetReaderToEndAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, EndianBinaryReader reader)
             where TBinaryAddressable : IBinaryAddressable
         {
             var address = binaryAddressable.AddressRange.endAddress;
             reader.BaseStream.Seek(address, SeekOrigin.Begin);
         }
 
-        public static void SetWriterToEndAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, BinaryWriter writer)
+        public static void SetWriterToEndAddress<TBinaryAddressable>(this TBinaryAddressable binaryAddressable, EndianBinaryWriter writer)
             where TBinaryAddressable : IBinaryAddressable
         {
             var address = binaryAddressable.AddressRange.endAddress;

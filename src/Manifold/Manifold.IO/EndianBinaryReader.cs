@@ -141,6 +141,8 @@ namespace Manifold.IO
             }
             return array;
         }
+
+
         public bool[] ReadBoolArray(int length) => ReadArray(length, ReadBool);
         public byte[] ReadUInt8Array(int length) => base.ReadBytes(length);
         public sbyte[] ReadInt8Array(int length) => ReadArray(length, ReadInt8);
@@ -187,10 +189,7 @@ namespace Manifold.IO
         public void Read(ref decimal value) => value = ReadDecimal();
         public void Read(ref string value, Encoding encoding, int lengthBytes) => value = ReadString(lengthBytes, encoding);
         public void Read(ref string value, Encoding encoding) => Read(ref value, encoding, ReadInt32());
-        public void ReadBinarySerializable<TBinarySerializable>(ref TBinarySerializable value) where TBinarySerializable : IBinarySerializable, new()
-            => value = ReadBinarySerializable<TBinarySerializable>();
-        public void Read<TEnum>(ref TEnum value, byte _ = 0) where TEnum : Enum
-            => value = ReadEnum<TEnum>();
+
 
         // READ ARRAY - REF
         public void Read(ref bool[] value, int length) => value = ReadBoolArray(length);
@@ -207,10 +206,7 @@ namespace Manifold.IO
         public void Read(ref double[] value, int length) => value = ReadDoubleArray(length);
         public void Read(ref decimal[] value, int length) => value = ReadDecimalArray(length);
         public void Read(ref string[] value, int length, Encoding encoding) => value = ReadStringArray(length, encoding);
-        public void ReadBinarySerializable<TBinarySerializable>(ref TBinarySerializable[] value, int length) where TBinarySerializable : IBinarySerializable, new()
-            => value = ReadBinarySerializableArray<TBinarySerializable>(length);
-        public void Read<TEnum>(ref TEnum[] value, int length, byte _ = 0) where TEnum : Enum
-            => value = ReadEnumArray<TEnum>(length);
+     
 
 
         internal short ReadInt16SameEndianness()
@@ -322,5 +318,77 @@ namespace Manifold.IO
             return BitConverter.ToDouble(bytes, 0);
         }
 
+
+        /// <summary>
+        /// Peeks the specified type from the base stream.
+        /// </summary>
+        /// <typeparam name="T">The type to peek</typeparam>
+        /// <param name="deserializationMethod">The method used to deserialize the value from stream</param>
+        /// <returns>
+        /// 
+        /// </returns>
+        public T PeekValue<T>(Func<T> deserializationMethod)
+        {
+            long streamPosition = BaseStream.Position;
+            T value = deserializationMethod();
+            BaseStream.Seek(streamPosition, SeekOrigin.Begin);
+            return value;
+        }
+
+        // System type names
+        public byte PeekUInt8() => PeekValue(ReadUInt8);
+        public ushort PeekUInt16() => PeekValue(fReadUInt16);
+        public uint PeekUInt32() => PeekValue(fReadUInt32);
+        public ulong PeekUInt64() => PeekValue(fReadUInt64);
+        public sbyte PeekInt8() => PeekValue(ReadInt8);
+        public short PeekInt16() => PeekValue(fReadInt16);
+        public int PeekInt32() => PeekValue(fReadInt32);
+        public long PeekInt64() => PeekValue(fReadInt64);
+
+        // Basic type names
+        public byte PeekByte() => PeekValue(ReadByte);
+        public ushort PeekUshort() => PeekValue(fReadUInt16);
+        public uint PeekUInt() => PeekValue(fReadUInt32);
+        public ulong PeekUlong() => PeekValue(fReadUInt64);
+        public sbyte PeekSbyte() => PeekValue(ReadSByte);
+        public short PeekShort() => PeekValue(fReadInt16);
+        public int PeekInt() => PeekValue(fReadInt32);
+        public long PeekLong() => PeekValue(fReadInt64);
+
+        // Floating point numbers
+        public Half PeekHalf() => PeekValue(fReadHalf);
+        public float PeekFloat() => PeekValue(fReadFloat);
+        public double PeekDouble() => PeekValue(fReadDouble);
+        public decimal PeekDecimal() => PeekValue(ReadDecimal);
     }
+
+    public static class EndianBinaryReaderCompilerWorkaround
+    {
+        public static void Read<TBinarySerializable>(this EndianBinaryReader reader, ref TBinarySerializable value)
+            where TBinarySerializable : IBinarySerializable, new()
+                => value = reader.ReadBinarySerializable<TBinarySerializable>();
+                
+        public static void Read<TEnum>(this EndianBinaryReader reader, ref TEnum value, byte _ = 0) where TEnum : Enum
+            => value = reader.ReadEnum<TEnum>();
+
+
+        public static void Read<TBinarySerializable>(this EndianBinaryReader reader, ref TBinarySerializable[] value, int length)
+            where TBinarySerializable : IBinarySerializable, new()
+                => value = reader.ReadBinarySerializableArray<TBinarySerializable>(length);
+
+        public static void Read<TEnum>(this EndianBinaryReader reader, ref TEnum[] value, int length, byte _ = 0)
+            where TEnum : Enum
+                => value = reader.ReadEnumArray<TEnum>(length);
+
+        public static T[] ReadArray<T>(this EndianBinaryReader reader, int length, Func<EndianBinaryReader, T> deserializeMethod)
+        {
+            T[] array = new T[length];
+            for (int i = 0; i < array.Length; ++i)
+            {
+                array[i] = deserializeMethod(reader);
+            }
+            return array;
+        }
+    }
+
 }

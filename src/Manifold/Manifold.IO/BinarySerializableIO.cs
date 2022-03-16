@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections;
 
 namespace Manifold.IO
 {
@@ -14,28 +11,30 @@ namespace Manifold.IO
         /// <param name="filePath"></param>
         /// <returns></returns>
         public static TBinarySerializable LoadFile<TBinarySerializable>(string filePath)
-            where TBinarySerializable : IBinarySerializable, IFileType, new()
+            where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
         {
-            using (var reader = new BinaryReader(File.OpenRead(filePath)))
+            var binarySerializable = new TBinarySerializable();
+            var endianness = binarySerializable.Endianness;
+            using (var reader = new EndianBinaryReader(File.OpenRead(filePath), endianness))
             {
-                var binarySerializable = new TBinarySerializable();
                 binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
                 binarySerializable.Deserialize(reader);
-                return binarySerializable;
             }
+            return binarySerializable;
         }
 
         /// <summary>
         /// Loads file at and stores valie in <paramref name="binarySerializable"/> without creating a new instance.
         /// </summary>
-        /// <typeparam name="TBinarySerializable">A type implementing the IBinarySerialize interface.</typeparam>
+        /// <typeparam name="TBinarySerializable">A type implementing the IBinarySerialize and IBinaryFileType interface.</typeparam>
         /// <param name="filePath">The file path to load from.</param>
         /// <param name="binarySerializable">The instance to deserialize the file to.</param>
         /// <returns></returns>
         public static TBinarySerializable LoadFile<TBinarySerializable>(string filePath, TBinarySerializable binarySerializable)
-            where TBinarySerializable : IBinarySerializable, IFileType
+            where TBinarySerializable : IBinarySerializable, IBinaryFileType
         {
-            using (var reader = new BinaryReader(File.OpenRead(filePath)))
+            var endianness = binarySerializable.Endianness;
+            using (var reader = new EndianBinaryReader(File.OpenRead(filePath), endianness))
             {
                 binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
                 binarySerializable.Deserialize(reader);
@@ -52,7 +51,7 @@ namespace Manifold.IO
         /// <returns></returns>
         /// <exception cref="ArgumentException"></exception>
         public static IEnumerable<TBinarySerializable> LoadFile<TBinarySerializable>(string[] filePaths, TBinarySerializable[] binarySerializables)
-            where TBinarySerializable : IBinarySerializable, IFileType, new()
+            where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
         {
             // Make sure arays are same length
             if (filePaths.Length != binarySerializables.Length)
@@ -80,7 +79,7 @@ namespace Manifold.IO
         /// <param name="filePaths"></param>
         /// <returns></returns>
         public static IEnumerable<TBinarySerializable> LoadFile<TBinarySerializable>(params string[] filePaths)
-            where TBinarySerializable : IBinarySerializable, IFileType, new()
+            where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
         {
             foreach (string filePath in filePaths)
             {
@@ -96,9 +95,10 @@ namespace Manifold.IO
         /// <param name="binarySerializable"></param>
         /// <param name="filePath"></param>
         public static void SaveFile<TBinarySerializable>(TBinarySerializable binarySerializable, string filePath)
-            where TBinarySerializable : IBinarySerializable, IFileType
+            where TBinarySerializable : IBinarySerializable, IBinaryFileType
         {
-            using (var writer = new BinaryWriter(File.Create(filePath)))
+            var endianness = binarySerializable.Endianness;
+            using (var writer = new EndianBinaryWriter(File.Create(filePath), endianness))
             {
                 binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
                 binarySerializable.Serialize(writer);
@@ -115,7 +115,7 @@ namespace Manifold.IO
         /// <exception cref="NullReferenceException"></exception>
         /// <exception cref="IOException"></exception>
         public static IEnumerable SaveFile<TBinarySerializable>(string rootPath, TBinarySerializable[] binarySerializables)
-            where TBinarySerializable : IBinarySerializable, IFileType
+            where TBinarySerializable : IBinarySerializable, IBinaryFileType
         {
             // Do a sanity check on parameters before serializing
             foreach (var binarySerializable in binarySerializables)

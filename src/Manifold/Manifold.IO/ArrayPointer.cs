@@ -1,8 +1,8 @@
-using System;
-using System.IO;
-
 namespace Manifold.IO
 {
+    /// <summary>
+    /// 
+    /// </summary>
     [Serializable]
     public struct ArrayPointer :
         IBinarySerializable,
@@ -30,16 +30,16 @@ namespace Manifold.IO
 
 
         // METHODS
-        public void Deserialize(BinaryReader reader)
+        public void Deserialize(EndianBinaryReader reader)
         {
-            reader.ReadX(ref length);
-            reader.ReadX(ref address);
+            reader.Read(ref length);
+            reader.Read(ref address);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public void Serialize(EndianBinaryWriter writer)
         {
-            writer.WriteX(length);
-            writer.WriteX(address);
+            writer.Write(length);
+            writer.Write(address);
         }
         public override string ToString()
         {

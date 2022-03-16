@@ -1,8 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
-
-namespace Manifold.IO
+﻿namespace Manifold.IO
 {
     public static class StreamWriterExtensions
     {

@@ -41,7 +41,7 @@ namespace Manifold.IO
 
 
         // METHODS
-        public static string ReadCString(BinaryReader reader, Encoding encoding)
+        public static string ReadCString(EndianBinaryReader reader, Encoding encoding)
         {
             buffer.Clear();
             while (true)
@@ -58,14 +58,14 @@ namespace Manifold.IO
             return str;
         }
 
-        public static void WriteCString(BinaryWriter writer, string value, Encoding encoding)
+        public static void WriteCString(EndianBinaryWriter writer, string value, Encoding encoding)
         {
-            writer.WriteX(value, encoding, false);
-            writer.WriteX(nullTerminator);
+            writer.Write(value, encoding, false);
+            writer.Write(nullTerminator);
         }
 
 
-        public void Deserialize(BinaryReader reader)
+        public void Deserialize(EndianBinaryReader reader)
         {
             this.RecordStartAddress(reader);
             {
@@ -74,7 +74,7 @@ namespace Manifold.IO
             this.RecordEndAddress(reader);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public void Serialize(EndianBinaryWriter writer)
         {
             this.RecordStartAddress(writer);
             {

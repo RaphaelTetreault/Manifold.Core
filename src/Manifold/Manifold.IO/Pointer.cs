@@ -47,14 +47,14 @@ namespace Manifold.IO
         }
 
         // METHODS
-        public void Deserialize(BinaryReader reader)
+        public void Deserialize(EndianBinaryReader reader)
         {
-            reader.ReadX(ref address);
+            reader.Read(ref address);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public void Serialize(EndianBinaryWriter writer)
         {
-            writer.WriteX(address);
+            writer.Write(address);
         }
 
         public override string ToString()

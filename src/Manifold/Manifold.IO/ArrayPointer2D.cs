@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace Manifold.IO
 {
     /// <summary>
@@ -42,7 +39,7 @@ namespace Manifold.IO
 
 
         // METHODS
-        public void Deserialize(BinaryReader reader)
+        public void Deserialize(EndianBinaryReader reader)
         {
             this.RecordStartAddress(reader);
             {
@@ -50,7 +47,7 @@ namespace Manifold.IO
                 for (int i = 0; i < arrayPointers.Length; i++)
                 {
                     int length = 0;
-                    reader.ReadX(ref length);
+                    reader.Read(ref length);
                     arrayPointers[i].length = length;
                 }
 
@@ -58,27 +55,27 @@ namespace Manifold.IO
                 for (int i = 0; i < arrayPointers.Length; i++)
                 {
                     int address = 0;
-                    reader.ReadX(ref address);
+                    reader.Read(ref address);
                     arrayPointers[i].address = address;
                 }
             }
             this.RecordEndAddress(reader);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public void Serialize(EndianBinaryWriter writer)
         {
             this.RecordStartAddress(writer);
             {
                 // Write array lengths
                 for (int i = 0; i < arrayPointers.Length; i++)
                 {
-                    writer.WriteX(arrayPointers[i].length);
+                    writer.Write(arrayPointers[i].length);
                 }
 
                 // Write array addresses
                 for (int i = 0; i < arrayPointers.Length; i++)
                 {
-                    writer.WriteX(arrayPointers[i].address);
+                    writer.Write(arrayPointers[i].address);
                 }
             }
             this.RecordEndAddress(writer);

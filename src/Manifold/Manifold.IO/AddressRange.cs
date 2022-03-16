@@ -1,8 +1,8 @@
-using System;
-using System.IO;
-
 namespace Manifold.IO
 {
+    /// <summary>
+    /// Represents a start and end address range.
+    /// </summary>
     [Serializable]
     public struct AddressRange
     {
@@ -25,10 +25,10 @@ namespace Manifold.IO
             startAddress = stream.Position;
         }
 
-        public void RecordStartAddress(BinaryReader reader)
+        public void RecordStartAddress(EndianBinaryReader reader)
             => RecordStartAddress(reader.BaseStream);
 
-        public void RecordStartAddress(BinaryWriter writer)
+        public void RecordStartAddress(EndianBinaryWriter writer)
             => RecordStartAddress(writer.BaseStream);
 
 
@@ -37,10 +37,10 @@ namespace Manifold.IO
             endAddress = stream.Position;
         }
 
-        public void RecordEndAddress(BinaryReader reader)
+        public void RecordEndAddress(EndianBinaryReader reader)
             => RecordEndAddress(reader.BaseStream);
 
-        public void RecordEndAddress(BinaryWriter writer)
+        public void RecordEndAddress(EndianBinaryWriter writer)
             => RecordEndAddress(writer.BaseStream);
 
 

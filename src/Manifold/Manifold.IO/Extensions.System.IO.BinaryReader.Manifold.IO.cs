@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-
 namespace Manifold.IO
 {
     public static partial class BinaryReaderExtensions
@@ -10,7 +7,7 @@ namespace Manifold.IO
         /// </summary>
         /// <param name="reader">The reader to jump in.</param>
         /// <param name="pointer">The pointer to jump to.</param>
-        public static void JumpToAddress(this BinaryReader reader, Pointer pointer)
+        public static void JumpToAddress(this EndianBinaryReader reader, Pointer pointer)
         {
             reader.BaseStream.Seek(pointer.address, SeekOrigin.Begin);
         }
@@ -20,7 +17,7 @@ namespace Manifold.IO
         /// </summary>
         /// <param name="reader">The reader to jump in.</param>
         /// <param name="arrayPointer">The pointer to jump to.</param>
-        public static void JumpToAddress(this BinaryReader reader, ArrayPointer arrayPointer)
+        public static void JumpToAddress(this EndianBinaryReader reader, ArrayPointer arrayPointer)
         {
             reader.BaseStream.Seek(arrayPointer.address, SeekOrigin.Begin);
         }
@@ -32,7 +29,7 @@ namespace Manifold.IO
         /// <returns>
         /// A pointer pointing to the address of the <paramref name="reader"/>'s stream position.
         /// </returns>
-        public static Pointer GetPositionAsPointer(this BinaryReader reader)
+        public static Pointer GetPositionAsPointer(this EndianBinaryReader reader)
         {
             return new Pointer(reader.BaseStream.Position);
         }

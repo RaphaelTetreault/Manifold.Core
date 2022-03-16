@@ -1,38 +1,37 @@
-using System.IO;
 using Unity.Mathematics;
 
 namespace Manifold.IO
 {
     public static partial class BinaryWriterExtensions
     {
-        public static void WriteX(this BinaryWriter writer, float2 value)
+        public static void Write(this EndianBinaryWriter writer, float2 value)
         {
-            writer.WriteX(value.x);
-            writer.WriteX(value.y);
+            writer.Write(value.x);
+            writer.Write(value.y);
         }
 
-        public static void WriteX(this BinaryWriter writer, float3 value)
+        public static void Write(this EndianBinaryWriter writer, float3 value)
         {
-            writer.WriteX(value.x);
-            writer.WriteX(value.y);
-            writer.WriteX(value.z);
+            writer.Write(value.x);
+            writer.Write(value.y);
+            writer.Write(value.z);
         }
 
-        public static void WriteX(this BinaryWriter writer, float4 value)
+        public static void Write(this EndianBinaryWriter writer, float4 value)
         {
-            writer.WriteX(value.x);
-            writer.WriteX(value.y);
-            writer.WriteX(value.z);
-            writer.WriteX(value.w);
+            writer.Write(value.x);
+            writer.Write(value.y);
+            writer.Write(value.z);
+            writer.Write(value.w);
         }
 
-        public static void WriteX(this BinaryWriter writer, quaternion value)
+        public static void Write(this EndianBinaryWriter writer, quaternion value)
         {
             // value.value pulls the float4 from within quaternion
-            writer.WriteX(value.value.x);
-            writer.WriteX(value.value.y);
-            writer.WriteX(value.value.z);
-            writer.WriteX(value.value.w);
+            writer.Write(value.value.x);
+            writer.Write(value.value.y);
+            writer.Write(value.value.z);
+            writer.Write(value.value.w);
         }
 
     }

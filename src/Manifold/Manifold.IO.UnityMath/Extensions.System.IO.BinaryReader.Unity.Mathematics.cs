@@ -1,67 +1,66 @@
-using System.IO;
 using Unity.Mathematics;
 
 namespace Manifold.IO
 {
     public static partial class BinaryReaderExtensions
     {
-        public static float2 ReadFloat2(this BinaryReader reader)
+        public static float2 ReadFloat2(this EndianBinaryReader reader)
         {
             return new float2(
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader));
+                reader.ReadFloat(),
+                reader.ReadFloat());
         }
 
-        public static float3 ReadFloat3(this BinaryReader reader)
+        public static float3 ReadFloat3(this EndianBinaryReader reader)
         {
             return new float3(
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader));
+                reader.ReadFloat(),
+                reader.ReadFloat(),
+                reader.ReadFloat());
         }
 
-        public static float4 ReadFloat4(this BinaryReader reader)
+        public static float4 ReadFloat4(this EndianBinaryReader reader)
         {
             return new float4(
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader));
+                reader.ReadFloat(),
+                reader.ReadFloat(),
+                reader.ReadFloat(),
+                reader.ReadFloat());
         }
 
-        public static quaternion ReadMathQuaternion(this BinaryReader reader)
+        public static quaternion ReadMathQuaternion(this EndianBinaryReader reader)
         {
             return new quaternion(
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader),
-                BinaryIoUtility.ReadFloat(reader));
+                reader.ReadFloat(),
+                reader.ReadFloat(),
+                reader.ReadFloat(),
+                reader.ReadFloat());
         }
 
 
         // Function forwarding
-        public static float2 ReadX(this BinaryReader reader, ref float2 value)
+        public static float2 Read(this EndianBinaryReader reader, ref float2 value)
             => value = reader.ReadFloat2();
 
-        public static float3 ReadX(this BinaryReader reader, ref float3 value)
+        public static float3 Read(this EndianBinaryReader reader, ref float3 value)
             => value = reader.ReadFloat3();
 
-        public static float4 ReadX(this BinaryReader reader, ref float4 value)
+        public static float4 Read(this EndianBinaryReader reader, ref float4 value)
             => value = reader.ReadFloat4();
 
-        public static quaternion ReadX(this BinaryReader reader, ref quaternion value)
+        public static quaternion Read(this EndianBinaryReader reader, ref quaternion value)
             => value = reader.ReadMathQuaternion();
 
-        public static float2[] ReadX(this BinaryReader reader, ref float2[] value, int length)
-            => value = BinaryIoUtility.ReadArray(reader, length, ReadFloat2);
+        public static float2[] Read(this EndianBinaryReader reader, ref float2[] value, int length)
+            => value = reader.ReadArray(length, ReadFloat2);
 
-        public static float3[] ReadX(this BinaryReader reader, ref float3[] value, int length)
-            => value = BinaryIoUtility.ReadArray(reader, length, ReadFloat3);
+        public static float3[] Read(this EndianBinaryReader reader, ref float3[] value, int length)
+            => value = reader.ReadArray(length, ReadFloat3);
 
-        public static float4[] ReadX(this BinaryReader reader, ref float4[] value, int length)
-            => value = BinaryIoUtility.ReadArray(reader, length, ReadFloat4);
+        public static float4[] Read(this EndianBinaryReader reader, ref float4[] value, int length)
+            => value = reader.ReadArray(length, ReadFloat4);
 
-        public static quaternion[] ReadX(this BinaryReader reader, ref quaternion[] value, int length)
-            => value = BinaryIoUtility.ReadArray(reader, length, ReadMathQuaternion);
+        public static quaternion[] Read(this EndianBinaryReader reader, ref quaternion[] value, int length)
+            => value = reader.ReadArray(length, ReadMathQuaternion);
     }
 }

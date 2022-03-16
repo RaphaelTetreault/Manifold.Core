@@ -63,14 +63,14 @@ namespace Manifold.IO
         }
 
 
-        public void Deserialize(BinaryReader reader)
+        public void Deserialize(EndianBinaryReader reader)
         {
-            reader.ReadX(ref addressOffset);
+            reader.Read(ref addressOffset);
         }
 
-        public void Serialize(BinaryWriter writer)
+        public void Serialize(EndianBinaryWriter writer)
         {
-            writer.WriteX(addressOffset);
+            writer.Write(addressOffset);
         }
 
         public override string ToString()
