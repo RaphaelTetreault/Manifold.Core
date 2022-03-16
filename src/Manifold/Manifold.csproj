@@ -18,4 +18,9 @@
     <None Remove="Manifold.Spline\**" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Remove="Manifold.asmdef" />
+    <None Remove="Manifold.asmdef.meta" />
+  </ItemGroup>
+
 </Project>

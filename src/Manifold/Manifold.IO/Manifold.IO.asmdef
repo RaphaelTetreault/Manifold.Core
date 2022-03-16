@@ -1,0 +1,16 @@
+{
+    "name": "Manifold.IO",
+    "rootNamespace": "Manifold.IO",
+    "references": [
+        "GUID:f1bb3b9088c546b46bbe048191ae40eb"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

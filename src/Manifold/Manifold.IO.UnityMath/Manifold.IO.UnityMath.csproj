@@ -7,6 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Manifold.IO.UnityMath.asmdef" />
+    <None Remove="Manifold.IO.UnityMath.asmdef.meta" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\..\..\Unity.Mathematics\src\Unity.Mathematics\Unity.Mathematics.csproj" />
     <ProjectReference Include="..\Manifold.IO\Manifold.IO.csproj" />
   </ItemGroup>
