@@ -72,8 +72,8 @@ namespace Manifold.IO
         }
 
         // READ
-        public override bool ReadBoolean() => ReadBoolean();
-        public bool ReadBool() => ReadBoolean();
+        public override bool ReadBoolean() => base.ReadBoolean();
+        public bool ReadBool() => base.ReadBoolean();
         public override byte ReadByte() => base.ReadByte();
         public byte ReadUInt8() => base.ReadByte();
         public override ushort ReadUInt16() => fReadUInt16.Invoke();
