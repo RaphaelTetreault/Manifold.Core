@@ -1,4 +1,6 @@
-﻿using System.Text;
+﻿using System;
+using System.IO;
+using System.Text;
 
 namespace Manifold.IO
 {
@@ -11,7 +13,7 @@ namespace Manifold.IO
         private readonly Action<short> WriteInt16;
         private readonly Action<int> WriteInt32;
         private readonly Action<long> WriteInt64;
-        private readonly Action<Half> WriteHalf;
+        //private readonly Action<Half> WriteHalf;
         private readonly Action<float> WriteFloat;
         private readonly Action<double> WriteDouble;
         private readonly Action<decimal> WriteDecimal;
@@ -47,7 +49,7 @@ namespace Manifold.IO
             WriteInt16 = requiresSwapEndianness ? WriteInt16SwapEndianness : WriteInt16SameEndianness;
             WriteInt32 = requiresSwapEndianness ? WriteInt32SwapEndianness : WriteInt32SameEndianness;
             WriteInt64 = requiresSwapEndianness ? WriteInt64SwapEndianness : WriteInt64SameEndianness;
-            WriteHalf = requiresSwapEndianness ? WriteHalfSwapEndianness : WriteHalfSameEndianness;
+            //WriteHalf = requiresSwapEndianness ? WriteHalfSwapEndianness : WriteHalfSameEndianness;
             WriteFloat = requiresSwapEndianness ? WriteFloatSwapEndianness : WriteFloatSameEndianness;
             WriteDouble = requiresSwapEndianness ? WriteDoubleSwapEndianness : WriteDoubleSameEndianness;
             WriteDecimal = requiresSwapEndianness ? WriteDecimalSwapEndianness : WriteDecimalSameEndianness;
@@ -63,7 +65,7 @@ namespace Manifold.IO
         public override void Write(short value) => WriteInt16.Invoke(value);
         public override void Write(int value) => WriteInt32.Invoke(value);
         public override void Write(long value) => WriteInt64.Invoke(value);
-        public override void Write(Half value) => WriteHalf.Invoke(value);
+        //public override void Write(Half value) => WriteHalf.Invoke(value);
         public override void Write(float value) => WriteFloat.Invoke(value);
         public override void Write(double value) => WriteDouble.Invoke(value);
         public override void Write(decimal value) => WriteDecimal.Invoke(value);
@@ -91,7 +93,7 @@ namespace Manifold.IO
         public void Write(short[] value) => WriteArray(value, WriteInt16);
         public void Write(int[] value) => WriteArray(value, WriteInt32);
         public void Write(long[] value) => WriteArray(value, WriteInt64);
-        public void Write(Half[] value) => WriteArray(value, WriteHalf);
+        //public void Write(Half[] value) => WriteArray(value, WriteHalf);
         public void Write(float[] value) => WriteArray(value, WriteFloat);
         public void Write(double[] value) => WriteArray(value, WriteDouble);
         public void Write(decimal[] value) => WriteArray(value, WriteDecimal);
@@ -180,17 +182,17 @@ namespace Manifold.IO
         }
 
 
-        internal void WriteHalfSameEndianness(Half value)
-        {
-            byte[] bytes = BitConverter.GetBytes(value);
-            base.Write(bytes);
-        }
-        internal void WriteHalfSwapEndianness(Half value)
-        {
-            byte[] bytes = BitConverter.GetBytes(value);
-            Array.Reverse(bytes);
-            base.Write(bytes);
-        }
+        //internal void WriteHalfSameEndianness(Half value)
+        //{
+        //    byte[] bytes = BitConverter.GetBytes(value);
+        //    base.Write(bytes);
+        //}
+        //internal void WriteHalfSwapEndianness(Half value)
+        //{
+        //    byte[] bytes = BitConverter.GetBytes(value);
+        //    Array.Reverse(bytes);
+        //    base.Write(bytes);
+        //}
 
         internal void WriteFloatSameEndianness(float value)
         {

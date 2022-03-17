@@ -1,4 +1,7 @@
-﻿using System.Text;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Text;
 
 namespace Manifold.IO
 {
@@ -27,7 +30,7 @@ namespace Manifold.IO
         private readonly Func<short> fReadInt16;
         private readonly Func<int> fReadInt32;
         private readonly Func<long> fReadInt64;
-        private readonly Func<Half> fReadHalf;
+        //private readonly Func<Half> fReadHalf;
         private readonly Func<float> fReadFloat;
         private readonly Func<double> fReadDouble;
 
@@ -63,7 +66,7 @@ namespace Manifold.IO
             fReadInt16 = requiresSwapEndianness ? ReadInt16SwapEndianness : ReadInt16SameEndianness;
             fReadInt32 = requiresSwapEndianness ? ReadInt32SwapEndianness : ReadInt32SameEndianness;
             fReadInt64 = requiresSwapEndianness ? ReadInt64SwapEndianness : ReadInt64SameEndianness;
-            fReadHalf = requiresSwapEndianness ? ReadHalfSwapEndianness : ReadHalfSameEndianness;
+            //fReadHalf = requiresSwapEndianness ? ReadHalfSwapEndianness : ReadHalfSameEndianness;
             fReadFloat = requiresSwapEndianness ? ReadFloatSwapEndianness : ReadFloatSameEndianness;
             fReadDouble = requiresSwapEndianness ? ReadDoubleSwapEndianness : ReadDoubleSameEndianness;
         }
@@ -82,7 +85,7 @@ namespace Manifold.IO
         public override int Read() => fReadInt32.Invoke();
         public override int ReadInt32() => fReadInt32.Invoke();
         public override long ReadInt64() => fReadInt64.Invoke();
-        public override Half ReadHalf() => fReadHalf.Invoke();
+        //public override Half ReadHalf() => fReadHalf.Invoke();
         public override float ReadSingle() => fReadFloat.Invoke();
         public float ReadFloat() => fReadFloat.Invoke();
         public override double ReadDouble() => fReadDouble.Invoke();
@@ -152,7 +155,7 @@ namespace Manifold.IO
         public uint[] ReadUInt32Array(int length) => ReadArray(length, ReadUInt32);
         public long[] ReadInt64Array(int length) => ReadArray(length, ReadInt64);
         public ulong[] ReadUInt64Array(int length) => ReadArray(length, ReadUInt64);
-        public Half[] ReadHalfArray(int length) => ReadArray(length, ReadHalf);
+        //public Half[] ReadHalfArray(int length) => ReadArray(length, ReadHalf);
         public float[] ReadFloatArray(int length) => ReadArray(length, ReadFloat);
         public double[] ReadDoubleArray(int length) => ReadArray(length, ReadDouble);
         public decimal[] ReadDecimalArray(int length) => ReadArray(length, ReadDecimal);
@@ -183,7 +186,7 @@ namespace Manifold.IO
         public void Read(ref uint value) => value = ReadUInt32();
         public void Read(ref long value) => value = ReadInt64();
         public void Read(ref ulong value) => value = ReadUInt64();
-        public void Read(ref Half value) => value = ReadHalf();
+        //public void Read(ref Half value) => value = ReadHalf();
         public void Read(ref float value) => value = ReadFloat();
         public void Read(ref double value) => value = ReadDouble();
         public void Read(ref decimal value) => value = ReadDecimal();
@@ -201,7 +204,7 @@ namespace Manifold.IO
         public void Read(ref uint[] value, int length) => value = ReadUInt32Array(length);
         public void Read(ref long[] value, int length) => value = ReadInt64Array(length);
         public void Read(ref ulong[] value, int length) => value = ReadUInt64Array(length);
-        public void Read(ref Half[] value, int length) => value = ReadHalfArray(length);
+        //public void Read(ref Half[] value, int length) => value = ReadHalfArray(length);
         public void Read(ref float[] value, int length) => value = ReadFloatArray(length);
         public void Read(ref double[] value, int length) => value = ReadDoubleArray(length);
         public void Read(ref decimal[] value, int length) => value = ReadDecimalArray(length);
@@ -282,17 +285,17 @@ namespace Manifold.IO
             return BitConverter.ToUInt64(bytes, 0);
         }
 
-        internal Half ReadHalfSameEndianness()
-        {
-            byte[] bytes = ReadBytes(SizeofHalf);
-            return BitConverter.ToHalf(bytes, 0);
-        }
-        internal Half ReadHalfSwapEndianness()
-        {
-            byte[] bytes = ReadBytes(SizeofHalf);
-            Array.Reverse(bytes);
-            return BitConverter.ToHalf(bytes, 0);
-        }
+        //internal Half ReadHalfSameEndianness()
+        //{
+        //    byte[] bytes = ReadBytes(SizeofHalf);
+        //    return BitConverter.ToHalf(bytes, 0);
+        //}
+        //internal Half ReadHalfSwapEndianness()
+        //{
+        //    byte[] bytes = ReadBytes(SizeofHalf);
+        //    Array.Reverse(bytes);
+        //    return BitConverter.ToHalf(bytes, 0);
+        //}
 
         internal float ReadFloatSameEndianness()
         {
@@ -356,7 +359,7 @@ namespace Manifold.IO
         public long PeekLong() => PeekValue(fReadInt64);
 
         // Floating point numbers
-        public Half PeekHalf() => PeekValue(fReadHalf);
+        //public Half PeekHalf() => PeekValue(fReadHalf);
         public float PeekFloat() => PeekValue(fReadFloat);
         public double PeekDouble() => PeekValue(fReadDouble);
         public decimal PeekDecimal() => PeekValue(ReadDecimal);

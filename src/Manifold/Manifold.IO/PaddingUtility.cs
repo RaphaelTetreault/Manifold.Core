@@ -1,4 +1,6 @@
-﻿namespace Manifold.IO
+﻿using System;
+
+namespace Manifold.IO
 {
     public static class PaddingUtility
     {

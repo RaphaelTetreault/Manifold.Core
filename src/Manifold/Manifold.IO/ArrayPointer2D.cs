@@ -7,7 +7,7 @@ namespace Manifold.IO
     /// Given a 2D array size [n,m]; the underlying binary is represented as 'n' lengths followed after
     /// by 'n' pointers. Once paired, the length and pointer form an <cref>ArrayPointer</cref>.
     /// </remarks>
-    [Serializable]
+    [System.Serializable]
     public sealed class ArrayPointer2D :
         IBinaryAddressable,
         IBinarySerializable

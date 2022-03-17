@@ -3,7 +3,7 @@ namespace Manifold.IO
     /// <summary>
     /// 
     /// </summary>
-    [Serializable]
+    [System.Serializable]
     public struct ArrayPointer :
         IBinarySerializable,
         IPointer

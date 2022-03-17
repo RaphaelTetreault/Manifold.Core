@@ -1,3 +1,5 @@
+using System.IO;
+
 namespace Manifold.IO
 {
     public static partial class BinaryReaderExtensions
