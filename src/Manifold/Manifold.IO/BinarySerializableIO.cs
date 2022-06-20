@@ -144,5 +144,23 @@ namespace Manifold.IO
                 yield return null;
             }
         }
+
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="TBinarySerializable"></typeparam>
+        /// <param name="binarySerializable"></param>
+        /// <param name="filePath"></param>
+        public static void SaveTo<TBinarySerializable>(TBinarySerializable binarySerializable, Stream destination)
+            where TBinarySerializable : IBinarySerializable, IBinaryFileType
+        {
+            var endianness = binarySerializable.Endianness;
+            using (var writer = new EndianBinaryWriter(destination, endianness))
+            {
+                //binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
+                binarySerializable.Serialize(writer);
+            }
+        }
     }
 }
