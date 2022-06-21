@@ -4,12 +4,41 @@ namespace Manifold
 {
     public static class StringBuilderExtension
     {
-        public static void AppendLineIndented(this StringBuilder stringBuilder, string indent, int indentLevel, ITextPrintable textPrintable)
+        private static string PrintNullValue<T>(T value)
         {
-            if (textPrintable == null)
-                stringBuilder.AppendLineIndented(indent, indentLevel, "null");
+            return $"{typeof(T).Name} (null)";
+        }
+
+        public static void AppendMultiLineIndented<TextPrintable>(this StringBuilder stringBuilder, string indent, int indentLevel, TextPrintable textPrintable)
+            where TextPrintable : ITextPrintable
+        {
+            if (textPrintable is null)
+                stringBuilder.AppendLineIndented(indent, indentLevel, PrintNullValue(textPrintable));
             else
                 textPrintable.PrintMultiLine(stringBuilder, indentLevel, indent);
+        }
+
+        public static void AppendMultiLineIndented<TextPrintable>(this StringBuilder stringBuilder, string indent, int indentLevel, TextPrintable[] textPrintables)
+            where TextPrintable : ITextPrintable
+        {
+            if (textPrintables is null)
+            {
+                stringBuilder.AppendLineIndented(indent, indentLevel, PrintNullValue(textPrintables));
+            }
+            else
+            {
+                string typeName = typeof(TextPrintable).Name;
+                string arrayPrefix = $"{typeName}[{textPrintables.Length}]";
+                int index = 0;
+
+                stringBuilder.AppendLineIndented(indent, indentLevel, arrayPrefix);
+                foreach (var value in textPrintables)
+                {
+                    string prefix = $"{typeName}[{index++}]";
+                    stringBuilder.AppendLineIndented(indent, indentLevel + 1, prefix);
+                    value.PrintMultiLine(stringBuilder, indentLevel + 1, indent);
+                }
+            }
         }
 
         public static void AppendIndented(this StringBuilder stringBuilder, string indent, int indentLevel, string value)
@@ -36,6 +65,20 @@ namespace Manifold
             stringBuilder.AppendRepeat(indent, indentLevel);
             stringBuilder.AppendLine(value);
         }
+
+
+        //public static void AppendMultilineIndented<TextPrintable>(this StringBuilder stringBuilder, string indent, int indentLevel, TextPrintable textPrintable)
+        //    where TextPrintable : ITextPrintable
+        //{
+        //    if (textPrintable is null)
+        //        stringBuilder.AppendLineIndented(indent, indentLevel, PrintNullValue(textPrintable));
+        //    else
+        //        textPrintable.PrintMultiLine(stringBuilder, indentLevel, indent);
+        //}
+
+
+
+
 
         /// <summary>
         /// Appends <paramref name="indent"/> as many times as specified by <paramref name="indentLevel"/>
