@@ -133,6 +133,20 @@ namespace Manifold.IO
                 default: throw new NotImplementedException("Unsupported Enum backing type used!");
             }
         }
+        /// <summary>
+        /// Read <paramref name="count"/> bytes from base stream. All bytes will be reversed
+        /// if the base stream is not the same endianness as the reader.
+        /// </summary>
+        /// <param name="count">The number of bytes to read.</param>
+        /// <returns></returns>
+        public byte[] ReadBytesEndianness(int count)
+        {
+            var bytes = ReadBytes(count);
+            if (BitConverter.IsLittleEndian ^ IsLittleEndian)
+                Array.Reverse(bytes);
+            return bytes;
+        }
+
 
         // READ ARRAY
         public T[] ReadArray<T>(int length, Func<T> deserializeMethod)
