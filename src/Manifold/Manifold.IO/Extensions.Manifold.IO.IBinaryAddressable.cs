@@ -145,7 +145,7 @@ namespace Manifold.IO
         public static ArrayPointer GetArrayPointer<TBinaryAddressable>(this TBinaryAddressable[] values)
             where TBinaryAddressable : IBinaryAddressable
         {
-            if (values == null || values.Length == 0)
+            if (values.IsNullOrEmpty())
                 return new ArrayPointer();
 
             var arrayPointer = new ArrayPointer()
