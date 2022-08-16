@@ -11,6 +11,15 @@ namespace Manifold.Spline
     {
         // Cubic Bezier, ^3
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="p0">Start position</param>
+        /// <param name="p1">Start out tangent</param>
+        /// <param name="p2">End in tangent</param>
+        /// <param name="p3">End position</param>
+        /// <param name="t">Time 0 through 1</param>
+        /// <returns></returns>
         public static float3 GetPoint(float3 p0, float3 p1, float3 p2, float3 p3, float t)
         {
             t = math.clamp(t, 0, 1);
