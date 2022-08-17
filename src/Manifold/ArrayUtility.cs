@@ -17,5 +17,13 @@ namespace Manifold
             }
             return array;
         }
+
+        public static TStruct[] CopyArray<TStruct>(TStruct[] array)
+            where TStruct : struct
+        {
+            var arrayCopy = new TStruct[array.Length];
+            array.CopyTo(arrayCopy, 0);
+            return arrayCopy;
+        }
     }
 }
