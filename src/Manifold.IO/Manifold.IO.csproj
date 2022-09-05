@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Manifold.csproj" />
+    <ProjectReference Include="..\Manifold\Manifold.csproj" />
   </ItemGroup>
 
 </Project>
