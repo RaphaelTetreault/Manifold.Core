@@ -41,5 +41,10 @@ namespace Manifold
                 array[i] = value;
             }
         }
+
+        public static T[] CopyCount<T>(this T[] array, int index, int count)
+            => ArrayUtility.CopyCount(array, index, count);
+        public static T[] CopyRange<T>(this T[] array, int indexFrom, int indexTo)
+            => ArrayUtility.CopyRange(array, indexFrom, indexTo);
     }
 }

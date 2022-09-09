@@ -25,5 +25,23 @@ namespace Manifold
             array.CopyTo(arrayCopy, 0);
             return arrayCopy;
         }
+
+        public static T[] CopyCount<T>(T[] array, int index, int count)
+        {
+            T[] subselection = new T[count];
+            for (int i = 0; i < count; i++)
+                subselection[i] = array[index + i];
+            return subselection;
+        }
+        public static T[] CopyRange<T>(T[] array, int indexFrom, int indexTo)
+        {
+            int count = indexTo - indexFrom + 1;
+            T[] subselection = new T[count];
+            for (int i = 0; i < count; i++)
+            {
+                subselection[i] = array[indexFrom + i];
+            }
+            return subselection;
+        }
     }
 }
