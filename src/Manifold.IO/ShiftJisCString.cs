@@ -15,7 +15,14 @@ namespace Manifold.IO
         public static readonly Encoding shiftJis = Encoding.GetEncoding(shiftJisCodepage);
 
         // PROPERTIES
-        public override Encoding Encoding => shiftJis;
+        public override Encoding Encoding
+        {
+            get
+            {
+                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                return shiftJis;
+            }
+        }
 
         // CONSTRUCTORS
         public ShiftJisCString() : base() { }

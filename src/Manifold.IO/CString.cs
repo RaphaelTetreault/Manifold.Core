@@ -47,7 +47,7 @@ namespace Manifold.IO
         public static string ReadCString(EndianBinaryReader reader, Encoding encoding)
         {
             buffer.Clear();
-            while (true)
+            while (!reader.IsAtEndOfStream())
             {
                 var @byte = reader.ReadByte();
 
