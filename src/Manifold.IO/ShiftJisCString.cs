@@ -19,7 +19,7 @@ namespace Manifold.IO
         {
             get
             {
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+                //Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
                 return shiftJis;
             }
         }
