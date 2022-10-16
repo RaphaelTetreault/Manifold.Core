@@ -89,7 +89,7 @@ namespace Manifold.IO
 
         public static implicit operator string(CString cstr) => cstr.Value;
 
-        public static implicit operator CString(string str) => str;
+        //public static implicit operator CString(string str) => str;
         public sealed override string ToString() => value;
 
         public bool Equals(CString? other)
