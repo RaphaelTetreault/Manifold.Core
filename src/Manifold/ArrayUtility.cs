@@ -17,6 +17,16 @@ namespace Manifold
             }
             return array;
         }
+        public static T[][] DefaultArray2D<T>(T defaultValue, int lengthDimension1, int lengthDimention2)
+        {
+            var array = new T[lengthDimension1][];
+            for (int i = 0; i < lengthDimension1; i++)
+            {
+                array[i] = DefaultArray(defaultValue, lengthDimention2);
+            }
+
+            return array;
+        }
 
         public static TStruct[] CopyArray<TStruct>(TStruct[] array)
             where TStruct : struct
