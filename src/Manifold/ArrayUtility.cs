@@ -53,5 +53,26 @@ namespace Manifold
             }
             return subselection;
         }
+
+
+
+
+        // 
+        public static string ConcatElements<T>(this T[] elements, Func<T, string> formatFunction, string separator = "")
+        {
+            var stringBuilder = new System.Text.StringBuilder();
+
+            for (int i = 0; i < elements.Length; i++)
+            {
+                var element = elements[i];
+                string elementFormated = formatFunction(element);
+                stringBuilder.Append(elementFormated);
+
+                if (i < elements.Length - 1)
+                    stringBuilder.Append(separator);
+            }
+
+            return stringBuilder.ToString();
+        }
     }
 }
