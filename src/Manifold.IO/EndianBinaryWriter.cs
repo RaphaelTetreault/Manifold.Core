@@ -107,6 +107,14 @@ namespace Manifold.IO
         }
 
 
+        public void WritePadding(byte padding, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                Write(padding);
+            }
+        }
+
         internal void WriteUInt16SameEndianness(ushort value)
         {
             byte[] bytes = BitConverter.GetBytes(value);
