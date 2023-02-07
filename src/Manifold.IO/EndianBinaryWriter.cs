@@ -109,6 +109,12 @@ namespace Manifold.IO
 
         public void WritePadding(byte padding, int count)
         {
+            if (count < 0)
+            {
+                string msg = "Cannot produce padding of negative size.";
+                throw new ArgumentException(msg);
+            }
+
             for (int i = 0; i < count; i++)
             {
                 Write(padding);
