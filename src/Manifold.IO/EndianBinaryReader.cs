@@ -52,9 +52,9 @@ namespace Manifold.IO
 
 
         // CONSTRUCTORS
-        public EndianBinaryReader(Stream output, Endianness endianness) : this(output, endianness, Encoding.UTF8, false) { }
-        public EndianBinaryReader(Stream output, Endianness endianness, Encoding encoding) : this(output, endianness, encoding, false) { }
-        public EndianBinaryReader(Stream output, Endianness endianness, Encoding encoding, bool leaveOpen) : base(output, encoding, leaveOpen)
+        public EndianBinaryReader(Stream input, Endianness endianness) : this(input, endianness, Encoding.UTF8, false) { }
+        public EndianBinaryReader(Stream input, Endianness endianness, Encoding encoding) : this(input, endianness, encoding, false) { }
+        public EndianBinaryReader(Stream input, Endianness endianness, Encoding encoding, bool leaveOpen) : base(input, encoding, leaveOpen)
         {
             // Store endianness
             this.endianness = endianness;
