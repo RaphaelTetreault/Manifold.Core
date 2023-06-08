@@ -3,8 +3,8 @@
 namespace Manifold.IO
 {
     /// <summary>
-    /// Simple wrapper class for string to encode and decode a C-style null-terminated
-    /// string in ASCII format.
+    ///     Simple wrapper class for string to encode and decode a C-style null-terminated
+    ///     string in ASCII format.
     /// </summary>
     public class AsciiCString : CString
     {

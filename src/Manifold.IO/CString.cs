@@ -3,9 +3,11 @@
 namespace Manifold.IO
 {
     /// <summary>
-    /// Simple wrapper class for string to encode and decode a C-style null-terminated string.
-    /// The inheritor must define the encoding used by the string.
+    ///     Simple wrapper class for string to encode and decode a C-style null-terminated string.
     /// </summary>
+    /// <remarks>
+    ///     The inheritor must define the encoding used by the string.
+    /// </remarks>
     [Serializable]
     public abstract class CString :
         IBinaryAddressable,
@@ -13,12 +15,12 @@ namespace Manifold.IO
         IEquatable<CString>
     {
         // CONSTANTS
-        public const byte nullTerminator = 0x00;
+        public const byte NullTerminator = 0x00;
+        private const int ByteBufferDefaultSize = 1024;
 
         // FIELDS
-        private static readonly List<byte> buffer = new List<byte>(64);
+        private static readonly ThreadLocal<List<byte>> readBuffer = new ThreadLocal<List<byte>>(CreateByteBuffer);
         private string value;
-
 
         // CONSTRUCTORS
         public CString()
@@ -32,7 +34,6 @@ namespace Manifold.IO
         }
 
 
-
         // PROPERTIES
         public AddressRange AddressRange { get; set; }
         public int Length => Value.Length;
@@ -40,30 +41,33 @@ namespace Manifold.IO
         public string Value { get => value; set => this.value = value; }
 
 
-        // METHODS
+        // OPERATORS
+        public static implicit operator string(CString cstr) => cstr.Value;
+
+
+        // METHODS        
         public static string ReadCString(EndianBinaryReader reader, Encoding encoding)
         {
-            buffer.Clear();
+            readBuffer.Value.Clear();
             while (!reader.IsAtEndOfStream())
             {
                 var @byte = reader.ReadByte();
 
                 // If a null character is read, stop
-                if (@byte is nullTerminator)
+                if (@byte is NullTerminator)
                     break;
 
-                buffer.Add(@byte);
+                readBuffer.Value.Add(@byte);
             }
-            var str = encoding.GetString(buffer.ToArray());
+            var str = encoding.GetString(readBuffer.Value.ToArray());
             return str;
         }
 
         public static void WriteCString(EndianBinaryWriter writer, string value, Encoding encoding)
         {
             writer.Write(value, encoding, false);
-            writer.Write(nullTerminator);
+            writer.Write(NullTerminator);
         }
-
 
         public void Deserialize(EndianBinaryReader reader)
         {
@@ -83,10 +87,6 @@ namespace Manifold.IO
             this.RecordEndAddress(writer);
         }
 
-
-        public static implicit operator string(CString cstr) => cstr.Value;
-
-        //public static implicit operator CString(string str) => str;
         public sealed override string ToString() => value;
 
         public bool Equals(CString? other)
@@ -98,5 +98,7 @@ namespace Manifold.IO
             bool isSameValue = Value == other.Value;
             return isSameValue;
         }
+
+        private static List<byte> CreateByteBuffer() => new List<byte>(ByteBufferDefaultSize);
     }
 }
