@@ -36,6 +36,11 @@ namespace Manifold.IO
             return pointer.address;
         }
 
+        public static explicit operator uint(Pointer pointer)
+        {
+            return (uint)pointer.address;
+        }
+
         public static implicit operator Pointer(int address)
         {
             return new Pointer(address);

@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 
 namespace Manifold.IO
 {
@@ -35,6 +34,10 @@ namespace Manifold.IO
         public static implicit operator int(Offset offset)
         {
             return offset.addressOffset;
+        }
+        public static explicit operator uint(Offset offset)
+        {
+            return (uint)offset.addressOffset;
         }
 
         public static implicit operator Offset(int addressOffset)

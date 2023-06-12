@@ -385,9 +385,9 @@ namespace Manifold.IO
             where TBinarySerializable : IBinarySerializable, new()
                 => value = reader.ReadBinarySerializable<TBinarySerializable>();
                 
-        public static void Read<TEnum>(this EndianBinaryReader reader, ref TEnum value, byte _ = 0) where TEnum : Enum
+        public static void Read<TEnum>(this EndianBinaryReader reader, ref TEnum value, byte _ = 0)
+            where TEnum : Enum
             => value = reader.ReadEnum<TEnum>();
-
 
         public static void Read<TBinarySerializable>(this EndianBinaryReader reader, ref TBinarySerializable[] value, int length)
             where TBinarySerializable : IBinarySerializable, new()
