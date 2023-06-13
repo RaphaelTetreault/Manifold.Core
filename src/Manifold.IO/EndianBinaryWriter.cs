@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Manifold.IO
@@ -10,10 +11,12 @@ namespace Manifold.IO
         private readonly Action<ushort> WriteUInt16;
         private readonly Action<uint> WriteUInt32;
         private readonly Action<ulong> WriteUInt64;
+        private readonly Action<UInt128> WriteUInt128;
         private readonly Action<short> WriteInt16;
         private readonly Action<int> WriteInt32;
         private readonly Action<long> WriteInt64;
-        //private readonly Action<Half> WriteHalf;
+        private readonly Action<Int128> WriteInt128;
+        private readonly Action<Half> WriteHalf;
         private readonly Action<float> WriteFloat;
         private readonly Action<double> WriteDouble;
         private readonly Action<decimal> WriteDecimal;
@@ -46,10 +49,12 @@ namespace Manifold.IO
             WriteUInt16 = requiresSwapEndianness ? WriteUInt16SwapEndianness : WriteUInt16SameEndianness;
             WriteUInt32 = requiresSwapEndianness ? WriteUInt32SwapEndianness : WriteUInt32SameEndianness;
             WriteUInt64 = requiresSwapEndianness ? WriteUInt64SwapEndianness : WriteUInt64SameEndianness;
+            WriteUInt128 = requiresSwapEndianness ? WriteUInt128SwapEndianness : WriteUInt128SameEndianness;
             WriteInt16 = requiresSwapEndianness ? WriteInt16SwapEndianness : WriteInt16SameEndianness;
             WriteInt32 = requiresSwapEndianness ? WriteInt32SwapEndianness : WriteInt32SameEndianness;
             WriteInt64 = requiresSwapEndianness ? WriteInt64SwapEndianness : WriteInt64SameEndianness;
-            //WriteHalf = requiresSwapEndianness ? WriteHalfSwapEndianness : WriteHalfSameEndianness;
+            WriteInt128 = requiresSwapEndianness ? WriteInt128SwapEndianness : WriteInt128SameEndianness;
+            WriteHalf = requiresSwapEndianness ? WriteHalfSwapEndianness : WriteHalfSameEndianness;
             WriteFloat = requiresSwapEndianness ? WriteFloatSwapEndianness : WriteFloatSameEndianness;
             WriteDouble = requiresSwapEndianness ? WriteDoubleSwapEndianness : WriteDoubleSameEndianness;
             WriteDecimal = requiresSwapEndianness ? WriteDecimalSwapEndianness : WriteDecimalSameEndianness;
@@ -61,11 +66,13 @@ namespace Manifold.IO
         public override void Write(ushort value) => WriteUInt16.Invoke(value);
         public override void Write(uint value) => WriteUInt32.Invoke(value);
         public override void Write(ulong value) => WriteUInt64.Invoke(value);
+        //public void Write(UInt128 value) => WriteUInt128.Invoke(value);
         public override void Write(sbyte value) => base.Write(value);
         public override void Write(short value) => WriteInt16.Invoke(value);
         public override void Write(int value) => WriteInt32.Invoke(value);
         public override void Write(long value) => WriteInt64.Invoke(value);
-        //public override void Write(Half value) => WriteHalf.Invoke(value);
+        //public void Write(Int128 value) => WriteInt128.Invoke(value);
+        public override void Write(Half value) => WriteHalf.Invoke(value);
         public override void Write(float value) => WriteFloat.Invoke(value);
         public override void Write(double value) => WriteDouble.Invoke(value);
         public override void Write(decimal value) => WriteDecimal.Invoke(value);
@@ -89,11 +96,13 @@ namespace Manifold.IO
         public void Write(ushort[] value) => WriteArray(value, WriteUInt16);
         public void Write(uint[] value) => WriteArray(value, WriteUInt32);
         public void Write(ulong[] value) => WriteArray(value, WriteUInt64);
+        //public void Write(UInt128[] value) => WriteArray(value, WriteUInt128);
         public void Write(sbyte[] value) => WriteArray(value, base.Write);
         public void Write(short[] value) => WriteArray(value, WriteInt16);
         public void Write(int[] value) => WriteArray(value, WriteInt32);
         public void Write(long[] value) => WriteArray(value, WriteInt64);
-        //public void Write(Half[] value) => WriteArray(value, WriteHalf);
+        //public void Write(Int128[] value) => WriteArray(value, WriteInt128);
+        public void Write(Half[] value) => WriteArray(value, WriteHalf);
         public void Write(float[] value) => WriteArray(value, WriteFloat);
         public void Write(double[] value) => WriteArray(value, WriteDouble);
         public void Write(decimal[] value) => WriteArray(value, WriteDecimal);
@@ -195,18 +204,41 @@ namespace Manifold.IO
             base.Write(bytes);
         }
 
+        internal void WriteUInt128SameEndianness(UInt128 value)
+        {
+            ReadOnlySpan<byte> bytes = MemoryMarshal.Cast<UInt128, byte>(MemoryMarshal.CreateReadOnlySpan(ref value, 1));
+            base.Write(bytes);
+        }
+        internal void WriteUInt128SwapEndianness(UInt128 value)
+        {
+            byte[] bytes = MemoryMarshal.Cast<UInt128, byte>(MemoryMarshal.CreateReadOnlySpan(ref value, 1)).ToArray();
+            Array.Reverse(bytes);
+            base.Write(bytes);
+        }
 
-        //internal void WriteHalfSameEndianness(Half value)
-        //{
-        //    byte[] bytes = BitConverter.GetBytes(value);
-        //    base.Write(bytes);
-        //}
-        //internal void WriteHalfSwapEndianness(Half value)
-        //{
-        //    byte[] bytes = BitConverter.GetBytes(value);
-        //    Array.Reverse(bytes);
-        //    base.Write(bytes);
-        //}
+        internal void WriteInt128SameEndianness(Int128 value)
+        {
+            ReadOnlySpan<byte> bytes = MemoryMarshal.Cast<Int128, byte>(MemoryMarshal.CreateReadOnlySpan(ref value, 1));
+            base.Write(bytes);
+        }
+        internal void WriteInt128SwapEndianness(Int128 value)
+        {
+            byte[] bytes = MemoryMarshal.Cast<Int128, byte>(MemoryMarshal.CreateReadOnlySpan(ref value, 1)).ToArray();
+            Array.Reverse(bytes);
+            base.Write(bytes);
+        }
+
+        internal void WriteHalfSameEndianness(Half value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            base.Write(bytes);
+        }
+        internal void WriteHalfSwapEndianness(Half value)
+        {
+            byte[] bytes = BitConverter.GetBytes(value);
+            Array.Reverse(bytes);
+            base.Write(bytes);
+        }
 
         internal void WriteFloatSameEndianness(float value)
         {

@@ -14,7 +14,7 @@ namespace Manifold.IO
         /// <param name="alignment">The stride of the alignment.</param>
         /// <param name="paddingValue">The value to use as padding.</param>
         /// <returns></returns>
-        public static long WriteAlignment(this EndianBinaryWriter writer, long alignment, byte paddingValue = 0x00)
+        public static long AlignTo(this EndianBinaryWriter writer, long alignment, byte paddingValue = 0x00)
         {
             var bytesToAlign = StreamExtensions.GetLengthOfAlignment(writer.BaseStream, alignment);
             for (int i = 0; i < bytesToAlign; i++)

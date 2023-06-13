@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -13,10 +12,12 @@ namespace Manifold.IO
         public const int SizeofInt16 = 2;
         public const int SizeofInt32 = 4;
         public const int SizeofInt64 = 8;
+        public const int SizeofInt128 = 16;
         public const int SizeofUint8 = 1;
         public const int SizeofUint16 = 2;
         public const int SizeofUint32 = 4;
         public const int SizeofUint64 = 8;
+        public const int SizeofUint128 = 16;
         public const int SizeofHalf = 2;
         public const int SizeofFloat = 4;
         public const int SizeofDouble = 8;
@@ -27,10 +28,12 @@ namespace Manifold.IO
         private readonly Func<ushort> fReadUInt16;
         private readonly Func<uint> fReadUInt32;
         private readonly Func<ulong> fReadUInt64;
+        private readonly Func<UInt128> fReadUInt128;
         private readonly Func<short> fReadInt16;
         private readonly Func<int> fReadInt32;
         private readonly Func<long> fReadInt64;
-        //private readonly Func<Half> fReadHalf;
+        private readonly Func<Int128> fReadInt128;
+        private readonly Func<Half> fReadHalf;
         private readonly Func<float> fReadFloat;
         private readonly Func<double> fReadDouble;
 
@@ -63,10 +66,12 @@ namespace Manifold.IO
             fReadUInt16 = requiresSwapEndianness ? ReadUInt16SwapEndianness : ReadUInt16SameEndianness;
             fReadUInt32 = requiresSwapEndianness ? ReadUInt32SwapEndianness : ReadUInt32SameEndianness;
             fReadUInt64 = requiresSwapEndianness ? ReadUInt64SwapEndianness : ReadUInt64SameEndianness;
+            fReadUInt128 = requiresSwapEndianness ? ReadUInt128SwapEndianness : ReadUInt128SameEndianness;
             fReadInt16 = requiresSwapEndianness ? ReadInt16SwapEndianness : ReadInt16SameEndianness;
             fReadInt32 = requiresSwapEndianness ? ReadInt32SwapEndianness : ReadInt32SameEndianness;
             fReadInt64 = requiresSwapEndianness ? ReadInt64SwapEndianness : ReadInt64SameEndianness;
-            //fReadHalf = requiresSwapEndianness ? ReadHalfSwapEndianness : ReadHalfSameEndianness;
+            fReadInt128 = requiresSwapEndianness ? ReadInt128SwapEndianness : ReadInt128SameEndianness;
+            fReadHalf = requiresSwapEndianness ? ReadHalfSwapEndianness : ReadHalfSameEndianness;
             fReadFloat = requiresSwapEndianness ? ReadFloatSwapEndianness : ReadFloatSameEndianness;
             fReadDouble = requiresSwapEndianness ? ReadDoubleSwapEndianness : ReadDoubleSameEndianness;
         }
@@ -79,13 +84,15 @@ namespace Manifold.IO
         public override ushort ReadUInt16() => fReadUInt16.Invoke();
         public override uint ReadUInt32() => fReadUInt32.Invoke();
         public override ulong ReadUInt64() => fReadUInt64.Invoke();
+        public UInt128 ReadUInt128() => fReadUInt128.Invoke();
         public override sbyte ReadSByte() => base.ReadSByte();
         public sbyte ReadInt8() => ReadSByte();
         public override short ReadInt16() => fReadInt16.Invoke();
         public override int Read() => fReadInt32.Invoke();
         public override int ReadInt32() => fReadInt32.Invoke();
         public override long ReadInt64() => fReadInt64.Invoke();
-        //public override Half ReadHalf() => fReadHalf.Invoke();
+        public Int128 ReadInt128() => fReadInt128.Invoke();
+        public override Half ReadHalf() => fReadHalf.Invoke();
         public override float ReadSingle() => fReadFloat.Invoke();
         public float ReadFloat() => fReadFloat.Invoke();
         public override double ReadDouble() => fReadDouble.Invoke();
@@ -169,7 +176,9 @@ namespace Manifold.IO
         public uint[] ReadUInt32Array(int length) => ReadArray(length, ReadUInt32);
         public long[] ReadInt64Array(int length) => ReadArray(length, ReadInt64);
         public ulong[] ReadUInt64Array(int length) => ReadArray(length, ReadUInt64);
-        //public Half[] ReadHalfArray(int length) => ReadArray(length, ReadHalf);
+        public Int128[] ReadInt128Array(int length) => ReadArray(length, ReadInt128);
+        public UInt128[] ReadUInt128Array(int length) => ReadArray(length, ReadUInt128);
+        public Half[] ReadHalfArray(int length) => ReadArray(length, ReadHalf);
         public float[] ReadFloatArray(int length) => ReadArray(length, ReadFloat);
         public double[] ReadDoubleArray(int length) => ReadArray(length, ReadDouble);
         public decimal[] ReadDecimalArray(int length) => ReadArray(length, ReadDecimal);
@@ -200,7 +209,9 @@ namespace Manifold.IO
         public void Read(ref uint value) => value = ReadUInt32();
         public void Read(ref long value) => value = ReadInt64();
         public void Read(ref ulong value) => value = ReadUInt64();
-        //public void Read(ref Half value) => value = ReadHalf();
+        public void Read(ref Int128 value) => value = ReadInt128();
+        public void Read(ref UInt128 value) => value = ReadUInt128();
+        public void Read(ref Half value) => value = ReadHalf();
         public void Read(ref float value) => value = ReadFloat();
         public void Read(ref double value) => value = ReadDouble();
         public void Read(ref decimal value) => value = ReadDecimal();
@@ -218,7 +229,9 @@ namespace Manifold.IO
         public void Read(ref uint[] value, int length) => value = ReadUInt32Array(length);
         public void Read(ref long[] value, int length) => value = ReadInt64Array(length);
         public void Read(ref ulong[] value, int length) => value = ReadUInt64Array(length);
-        //public void Read(ref Half[] value, int length) => value = ReadHalfArray(length);
+        public void Read(ref Int128[] value, int length) => value = ReadInt128Array(length);
+        public void Read(ref UInt128[] value, int length) => value = ReadUInt128Array(length);
+        public void Read(ref Half[] value, int length) => value = ReadHalfArray(length);
         public void Read(ref float[] value, int length) => value = ReadFloatArray(length);
         public void Read(ref double[] value, int length) => value = ReadDoubleArray(length);
         public void Read(ref decimal[] value, int length) => value = ReadDecimalArray(length);
@@ -277,7 +290,6 @@ namespace Manifold.IO
         internal long ReadInt64SameEndianness()
         {
             byte[] bytes = ReadBytes(SizeofInt64);
-            Array.Reverse(bytes);
             return BitConverter.ToInt64(bytes, 0);
         }
         internal long ReadInt64SwapEndianness()
@@ -299,17 +311,53 @@ namespace Manifold.IO
             return BitConverter.ToUInt64(bytes, 0);
         }
 
-        //internal Half ReadHalfSameEndianness()
-        //{
-        //    byte[] bytes = ReadBytes(SizeofHalf);
-        //    return BitConverter.ToHalf(bytes, 0);
-        //}
-        //internal Half ReadHalfSwapEndianness()
-        //{
-        //    byte[] bytes = ReadBytes(SizeofHalf);
-        //    Array.Reverse(bytes);
-        //    return BitConverter.ToHalf(bytes, 0);
-        //}
+        internal Int128 ReadInt128SameEndianness()
+        {
+            byte[] bytes = ReadBytes(SizeofInt128);
+            ulong upper = BitConverter.ToUInt64(bytes, 0);
+            ulong lower = BitConverter.ToUInt64(bytes, SizeofInt64);
+            Int128 value = new Int128(upper, lower);
+            return value;
+        }
+        internal Int128 ReadInt128SwapEndianness()
+        {
+            byte[] bytes = ReadBytes(SizeofInt128);
+            Array.Reverse(bytes);
+            ulong upper = BitConverter.ToUInt64(bytes, 0);
+            ulong lower = BitConverter.ToUInt64(bytes, SizeofInt64);
+            Int128 value = new Int128(upper, lower);
+            return value;
+        }
+
+        internal UInt128 ReadUInt128SameEndianness()
+        {
+            byte[] bytes = ReadBytes(SizeofInt128);
+            ulong upper = BitConverter.ToUInt64(bytes, 0);
+            ulong lower = BitConverter.ToUInt64(bytes, SizeofUint64);
+            UInt128 value = new UInt128(upper, lower);
+            return value;
+        }
+        internal UInt128 ReadUInt128SwapEndianness()
+        {
+            byte[] bytes = ReadBytes(SizeofInt128);
+            Array.Reverse(bytes);
+            ulong upper = BitConverter.ToUInt64(bytes, 0);
+            ulong lower = BitConverter.ToUInt64(bytes, SizeofUint64);
+            UInt128 value = new UInt128(upper, lower);
+            return value;
+        }
+
+        internal Half ReadHalfSameEndianness()
+        {
+            byte[] bytes = ReadBytes(SizeofHalf);
+            return BitConverter.ToHalf(bytes, 0);
+        }
+        internal Half ReadHalfSwapEndianness()
+        {
+            byte[] bytes = ReadBytes(SizeofHalf);
+            Array.Reverse(bytes);
+            return BitConverter.ToHalf(bytes, 0);
+        }
 
         internal float ReadFloatSameEndianness()
         {
@@ -357,10 +405,12 @@ namespace Manifold.IO
         public ushort PeekUInt16() => PeekValue(fReadUInt16);
         public uint PeekUInt32() => PeekValue(fReadUInt32);
         public ulong PeekUInt64() => PeekValue(fReadUInt64);
+        public UInt128 PeekUInt128() => PeekValue(fReadUInt128);
         public sbyte PeekInt8() => PeekValue(ReadInt8);
         public short PeekInt16() => PeekValue(fReadInt16);
         public int PeekInt32() => PeekValue(fReadInt32);
         public long PeekInt64() => PeekValue(fReadInt64);
+        public Int128 PeekInt128() => PeekValue(fReadInt128);
 
         // Basic type names
         public byte PeekByte() => PeekValue(ReadByte);
@@ -373,7 +423,7 @@ namespace Manifold.IO
         public long PeekLong() => PeekValue(fReadInt64);
 
         // Floating point numbers
-        //public Half PeekHalf() => PeekValue(fReadHalf);
+        public Half PeekHalf() => PeekValue(fReadHalf);
         public float PeekFloat() => PeekValue(fReadFloat);
         public double PeekDouble() => PeekValue(fReadDouble);
         public decimal PeekDecimal() => PeekValue(ReadDecimal);

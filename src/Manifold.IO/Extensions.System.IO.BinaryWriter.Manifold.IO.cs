@@ -44,9 +44,9 @@ namespace Manifold.IO
             var bytes = Encoding.ASCII.GetBytes(message);
             byte padByte = (byte)padding;
 
-            writer.WriteAlignment(alignment, padByte);
+            writer.AlignTo(alignment, padByte);
             writer.Write(bytes);
-            writer.WriteAlignment(alignment, padByte);
+            writer.AlignTo(alignment, padByte);
         }
         public static void CommentType<T>(this EndianBinaryWriter writer, bool doWrite, char padding = ' ', int alignment = 16)
             => Comment(writer, typeof(T).Name, doWrite, padding, alignment);
@@ -61,7 +61,7 @@ namespace Manifold.IO
 
             byte padByte = (byte)padding;
 
-            writer.WriteAlignment(alignment, padByte);
+            writer.AlignTo(alignment, padByte);
             for (int i = 0; i < alignment; i++)
                 writer.Write(padByte);
         }
@@ -71,7 +71,7 @@ namespace Manifold.IO
             if (!doWrite)
                 return;
 
-            writer.WriteAlignment(alignment, (byte)padding);
+            writer.AlignTo(alignment, (byte)padding);
         }
 
         public static void CommentLineWide(this EndianBinaryWriter writer, string lMsg, string rMsg, bool doWrite, char padding = ' ', int alignment = 16)
@@ -115,7 +115,7 @@ namespace Manifold.IO
             if (!doWrite)
                 return;
 
-            writer.WriteAlignment(alignment, (byte)padding);
+            writer.AlignTo(alignment, (byte)padding);
             CommentNewLine(writer, true, '-', alignment);
             writer.CommentType(type, true, ' ', alignment);
             if (typeof(T).IsArray)
@@ -136,7 +136,7 @@ namespace Manifold.IO
                 return;
 
             // Align with desired padding, not '-' from next call
-            writer.WriteAlignment(alignment, (byte)padding);
+            writer.AlignTo(alignment, (byte)padding);
 
             CommentNewLine(writer, true, '-', alignment);
             writer.CommentType(type, true, ' ', alignment);
@@ -149,7 +149,7 @@ namespace Manifold.IO
                 return;
 
             // Align with desired padding, not '-' from next call
-            writer.WriteAlignment(kAlignment, (byte)kWhiteSpace);
+            writer.AlignTo(kAlignment, (byte)kWhiteSpace);
 
             CommentNewLine(writer, true, '-', kAlignment);
             foreach (var comment in comments)
