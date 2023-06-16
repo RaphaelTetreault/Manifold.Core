@@ -236,7 +236,24 @@ namespace Manifold.IO
         public void Read(ref double[] value, int length) => value = ReadDoubleArray(length);
         public void Read(ref decimal[] value, int length) => value = ReadDecimalArray(length);
         public void Read(ref string[] value, int length, Encoding encoding) => value = ReadStringArray(length, encoding);
-     
+
+        // consider returning a small struct with more info
+        public bool ReadPadding(byte padding, int count)
+        {
+            if (count < 0)
+            {
+                string msg = "Cannot read padding of negative size.";
+                throw new ArgumentException(msg);
+            }
+
+            for (int i = 0; i < count; i++)
+            {
+                byte value = ReadByte();
+                if (value != padding)
+                    return false;
+            }
+            return true;
+        }
 
 
         internal short ReadInt16SameEndianness()
