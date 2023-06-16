@@ -15,7 +15,8 @@ namespace Manifold.IO
     public abstract class CString :
         IBinaryAddressable,
         IBinarySerializable,
-        IEquatable<CString>
+        IEquatable<CString>,
+        IComparable<CString>
     {
         // CONSTANTS
         public const byte NullTerminator = 0x00;
@@ -49,7 +50,7 @@ namespace Manifold.IO
 
 
         // METHODS        
-        public static string ReadCString(EndianBinaryReader reader, Encoding encoding)
+        private static string ReadCString(EndianBinaryReader reader, Encoding encoding)
         {
             readBuffer.Value.Clear();
             while (!reader.IsAtEndOfStream())
@@ -66,7 +67,7 @@ namespace Manifold.IO
             return str;
         }
 
-        public static void WriteCString(EndianBinaryWriter writer, string value, Encoding encoding)
+        private static void WriteCString(EndianBinaryWriter writer, string value, Encoding encoding)
         {
             writer.Write(value, encoding, false);
             writer.Write(NullTerminator);
@@ -90,7 +91,15 @@ namespace Manifold.IO
             this.RecordEndAddress(writer);
         }
 
-        public sealed override string ToString() => value;
+        public int GetSerializedLength()
+        {
+            byte[] bytes = Encoding.GetBytes(value);
+            int length = bytes.Length + 1; // +1 for null
+            return length;
+        }
+
+        public sealed override string ToString()
+            => value;
 
         public bool Equals(CString? other)
         {
@@ -102,6 +111,12 @@ namespace Manifold.IO
             return isSameValue;
         }
 
-        private static List<byte> CreateByteBuffer() => new List<byte>(ByteBufferDefaultSize);
+        private static List<byte> CreateByteBuffer()
+            => new List<byte>(ByteBufferDefaultSize);
+
+        public int CompareTo(CString? other)
+        {
+            return string.Compare(this, other);
+        }
     }
 }
