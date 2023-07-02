@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Text;
+using System.Runtime.InteropServices;
 
 namespace Manifold.IO
 {
@@ -24,6 +25,7 @@ namespace Manifold.IO
         public const int SizeofDecimal = 16;
 
         // FIELDS
+        // Endianness
         private readonly Endianness endianness;
         private readonly Func<ushort> fReadUInt16;
         private readonly Func<uint> fReadUInt32;
@@ -36,6 +38,15 @@ namespace Manifold.IO
         private readonly Func<Half> fReadHalf;
         private readonly Func<float> fReadFloat;
         private readonly Func<double> fReadDouble;
+        // Endian-less functions
+        private readonly Func<byte> fReadByte;
+        private readonly Func<int, byte[]> fReadBytes;
+        private readonly Func<bool> fReadBool;
+        private readonly Func<sbyte> fReadSByte;
+        // TODO: ReadChar
+        // TODO: ReadChars
+        // TODO: ReadString
+
 
         // PROPERTIES
         /// <summary>
@@ -57,11 +68,11 @@ namespace Manifold.IO
         // CONSTRUCTORS
         public EndianBinaryReader(Stream input, Endianness endianness) : this(input, endianness, Encoding.UTF8, false) { }
         public EndianBinaryReader(Stream input, Endianness endianness, Encoding encoding) : this(input, endianness, encoding, false) { }
-        public EndianBinaryReader(Stream input, Endianness endianness, Encoding encoding, bool leaveOpen) : base(input, encoding, leaveOpen)
+        public EndianBinaryReader(Stream input, Endianness endianness, Encoding encoding, bool leaveOpen) : this(input, endianness, encoding, leaveOpen, Endianness.LittleEndian) { }
+        public EndianBinaryReader(Stream input, Endianness endianness, Encoding encoding, bool leaveOpen, Endianness bitEndianess) : base(input, encoding, leaveOpen)
         {
-            // Store endianness
-            this.endianness = endianness;
             // Select the appropriate serialization functions, store function reference
+            this.endianness = endianness;
             bool requiresSwapEndianness = BitConverter.IsLittleEndian ^ IsLittleEndian;
             fReadUInt16 = requiresSwapEndianness ? ReadUInt16SwapEndianness : ReadUInt16SameEndianness;
             fReadUInt32 = requiresSwapEndianness ? ReadUInt32SwapEndianness : ReadUInt32SameEndianness;
@@ -74,18 +85,28 @@ namespace Manifold.IO
             fReadHalf = requiresSwapEndianness ? ReadHalfSwapEndianness : ReadHalfSameEndianness;
             fReadFloat = requiresSwapEndianness ? ReadFloatSwapEndianness : ReadFloatSameEndianness;
             fReadDouble = requiresSwapEndianness ? ReadDoubleSwapEndianness : ReadDoubleSameEndianness;
+            //
+            fReadBool = base.ReadBoolean;
+            fReadByte = base.ReadByte;
+            fReadSByte = base.ReadSByte;
+            fReadBytes = base.ReadBytes;
+            // Unmodified functions.
+            // TODO: ReadChar
+            // TODO: ReadChars
+            // TODO: ReadString
         }
 
         // READ
-        public override bool ReadBoolean() => base.ReadBoolean();
-        public bool ReadBool() => base.ReadBoolean();
-        public override byte ReadByte() => base.ReadByte();
-        public byte ReadUInt8() => base.ReadByte();
+        public override bool ReadBoolean() => fReadBool();
+        public bool ReadBool() => fReadBool();
+        public override byte ReadByte() => fReadByte();
+        public override byte[] ReadBytes(int count) => fReadBytes(count);
+        public byte ReadUInt8() => fReadByte();
         public override ushort ReadUInt16() => fReadUInt16.Invoke();
         public override uint ReadUInt32() => fReadUInt32.Invoke();
         public override ulong ReadUInt64() => fReadUInt64.Invoke();
         public UInt128 ReadUInt128() => fReadUInt128.Invoke();
-        public override sbyte ReadSByte() => base.ReadSByte();
+        public override sbyte ReadSByte() => fReadSByte();
         public sbyte ReadInt8() => ReadSByte();
         public override short ReadInt16() => fReadInt16.Invoke();
         public override int Read() => fReadInt32.Invoke();
@@ -168,7 +189,7 @@ namespace Manifold.IO
 
 
         public bool[] ReadBoolArray(int length) => ReadArray(length, ReadBool);
-        public byte[] ReadUInt8Array(int length) => base.ReadBytes(length);
+        public byte[] ReadUInt8Array(int length) => fReadBytes(length);
         public sbyte[] ReadInt8Array(int length) => ReadArray(length, ReadInt8);
         public short[] ReadInt16Array(int length) => ReadArray(length, ReadInt16);
         public ushort[] ReadUInt16Array(int length) => ReadArray(length, ReadUInt16);
@@ -451,7 +472,7 @@ namespace Manifold.IO
         public static void Read<TBinarySerializable>(this EndianBinaryReader reader, ref TBinarySerializable value)
             where TBinarySerializable : IBinarySerializable, new()
                 => value = reader.ReadBinarySerializable<TBinarySerializable>();
-                
+
         public static void Read<TEnum>(this EndianBinaryReader reader, ref TEnum value, byte _ = 0)
             where TEnum : Enum
             => value = reader.ReadEnum<TEnum>();

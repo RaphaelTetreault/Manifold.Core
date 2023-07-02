@@ -1,41 +1,67 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Manifold.IO
 {
     public class BitStreamReader
     {
-        private BitArray stream;
+        private EndianBinaryReader source;
+        private BitArray bitstream;
         private int position;
 
         public int Position { get => position; set => position = value; }
 
-        public BitStreamReader(byte[] bytes)
+        public BitStreamReader(EndianBinaryReader endianBinaryReader)
         {
-            stream = new BitArray(bytes);
+            source = endianBinaryReader;
+
+            long position = endianBinaryReader.BaseStream.Position;
+            this.position = (int)position * 8;
+
+            endianBinaryReader.SeekBegin();
+            var bytes = endianBinaryReader.ReadBytes((int)endianBinaryReader.BaseStream.Length);
+            bitstream = new BitArray(bytes);
+            endianBinaryReader.JumpToAddress(position);
         }
 
 
         private T Read<T>(int nBits, Func<bool[], T> function)
         {
-            int start = position;
-            int end = position + nBits;
+            int position = this.position; // optimize, put in scope
             bool[] bits = new bool[nBits];
-            for (int i = start; i < end; i++)
-                bits[i] = stream[i];
+            for (int i = 0; i < nBits; i++)
+            {
+                int index = position + i;
+                bool bit = bitstream[index];
+                bits[i] = bit;
+            }
             T value = function(bits);
+            UpdatePosition(nBits);
             return value;
         }
 
-        public bool ReadBool() => GetBool();
+        public bool ReadBool()
+        {
+            bool value = bitstream[position];
+            UpdatePosition(1);
+            return value;
+        }
         public byte ReadByte(int nBits) => Read(nBits, BoolsToByte);
         public ushort ReadUShort(int nBits) => Read(nBits, BoolsToUShort);
         public uint ReadUInt(int nBits) => Read(nBits, BoolsToUInt);
+        public byte[] ReadBytes(int nBits)
+        {
+            int length = (int)MathF.Ceiling(nBits / 8f);
+            byte[] bytes = new byte[length];
+            int nBitsLeft = nBits;
+            for (int i = 0; i < length; i++)
+            {
+                int nBitsRead = nBitsLeft > 8 ? 8 : nBitsLeft;
+                bytes[i] = ReadByte(nBitsLeft);
+                nBitsLeft -= nBitsRead;
+            }
+            return bytes;
+        }
 
         public byte ReadUInt8(int nBits) => ReadByte(nBits);
         public ushort ReadUInt16(int nBits) => ReadUShort(nBits);
@@ -57,13 +83,24 @@ namespace Manifold.IO
         {
             value = ReadUInt(nBits);
         }
-
-        private bool GetBool()
+        public void Read(ref byte[] value, int nBits)
         {
-            bool value = stream[position];
-            position++;
-            return value;
+            value = ReadBytes(nBits);
         }
+        public void Read<TIBitSerializable>(ref TIBitSerializable bitSerializable)
+            where TIBitSerializable : IBitSerializable, new()
+        {
+            bitSerializable = new();
+            bitSerializable.Deserialize(this);
+        }
+        public void Read<TIBitSerializable>(ref TIBitSerializable[] bitSerializables, int count)
+            where TIBitSerializable : IBitSerializable, new()
+        {
+            bitSerializables = new TIBitSerializable[count];
+            for (int i = 0; i < count; i++)
+                bitSerializables[i].Deserialize(this);
+        }
+
         private byte BoolsToByte(bool[] bools)
         {
             // TODO: MESSAGE
@@ -71,14 +108,7 @@ namespace Manifold.IO
             if (!isvalid)
                 throw new ArgumentException();
 
-            byte value = 0;
-            for (int i = 0; i < bools.Length; i++)
-            {
-                bool @bool = bools[i];
-                int bit = @bool ? 1 : 0;
-                value += (byte)(bit << i);
-            }
-
+            byte value = (byte)BoolsToInteger(bools);
             return value;
         }
         private ushort BoolsToUShort(bool[] bools)
@@ -88,14 +118,7 @@ namespace Manifold.IO
             if (!isvalid)
                 throw new ArgumentException();
 
-            ushort value = 0;
-            for (int i = 0; i < bools.Length; i++)
-            {
-                bool @bool = bools[i];
-                int bit = @bool ? 1 : 0;
-                value += (ushort)(bit << i);
-            }
-
+            ushort value = (ushort)BoolsToInteger(bools);
             return value;
         }
         private uint BoolsToUInt(bool[] bools)
@@ -105,27 +128,29 @@ namespace Manifold.IO
             if (!isvalid)
                 throw new ArgumentException();
 
-            uint value = 0;
+            uint value = (uint)BoolsToInteger(bools);
+            return value;
+        }
+
+        private int BoolsToInteger(bool[] bools)
+        {
+            int value = 0;
             for (int i = 0; i < bools.Length; i++)
             {
                 bool @bool = bools[i];
                 int bit = @bool ? 1 : 0;
-                value += (uint)(bit << i);
+                value += bit << (bools.Length - 1 - i);
             }
 
             return value;
         }
 
-        public void MirrorBytes()
+        private void UpdatePosition(int bitsForward)
         {
-            for (int i = 0; i < stream.Length; i += 8)
-            {
-                // Swap bits around
-                (stream[i + 0], stream[i + 7]) = (stream[i + 7], stream[i + 0]);
-                (stream[i + 1], stream[i + 6]) = (stream[i + 6], stream[i + 1]);
-                (stream[i + 2], stream[i + 5]) = (stream[i + 5], stream[i + 2]);
-                (stream[i + 3], stream[i + 4]) = (stream[i + 4], stream[i + 3]);
-            }
+            // Move bit address forward
+            position += bitsForward;
+            // Map position to source stream - keep in sync
+            source.BaseStream.Position = (long)MathF.Ceiling(position / 8.0f);
         }
     }
 }
