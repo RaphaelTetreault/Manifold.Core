@@ -49,6 +49,12 @@ namespace Manifold.IO
         public byte ReadByte(int nBits) => Read(nBits, BoolsToByte);
         public ushort ReadUShort(int nBits) => Read(nBits, BoolsToUShort);
         public uint ReadUInt(int nBits) => Read(nBits, BoolsToUInt);
+        public float ReadFloat()
+        {
+            byte[] bytes = ReadBytes(32);
+            float value = Convert.ToSingle(bytes);
+            return value;
+        }
         public byte[] ReadBytes(int nBits)
         {
             int length = (int)MathF.Ceiling(nBits / 8f);
@@ -62,6 +68,7 @@ namespace Manifold.IO
             }
             return bytes;
         }
+
 
         public byte ReadUInt8(int nBits) => ReadByte(nBits);
         public ushort ReadUInt16(int nBits) => ReadUShort(nBits);
@@ -82,6 +89,10 @@ namespace Manifold.IO
         public void Read(ref uint value, int nBits)
         {
             value = ReadUInt(nBits);
+        }
+        public void Read(ref float value)
+        {
+            value = ReadFloat();
         }
         public void Read(ref byte[] value, int nBits)
         {
