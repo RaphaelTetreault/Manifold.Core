@@ -57,7 +57,7 @@ namespace Manifold.IO
             for (int i = 0; i < length; i++)
             {
                 int nBitsRead = nBitsLeft > 8 ? 8 : nBitsLeft;
-                bytes[i] = ReadByte(nBitsLeft);
+                bytes[i] = ReadByte(nBitsRead);
                 nBitsLeft -= nBitsRead;
             }
             return bytes;
@@ -98,7 +98,10 @@ namespace Manifold.IO
         {
             bitSerializables = new TIBitSerializable[count];
             for (int i = 0; i < count; i++)
+            {
+                bitSerializables[i] = new();
                 bitSerializables[i].Deserialize(this);
+            }
         }
 
         private byte BoolsToByte(bool[] bools)
