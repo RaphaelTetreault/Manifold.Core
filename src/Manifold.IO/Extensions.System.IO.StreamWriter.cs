@@ -71,7 +71,7 @@ namespace Manifold.IO
             var flags = @enum.GetFlags(true).Reverse();
             foreach (var flag in flags)
             {
-                object value = flag is null ? string.Empty : flag; 
+                object value = flag is null ? string.Empty : flag;
                 writer.WriteNextCol(value);
             }
         }
@@ -81,11 +81,11 @@ namespace Manifold.IO
             var name = value.Replace("_", " ");
 
             // TODO: make your own "nicify" function
-            #if UNITY_EDITOR
+#if UNITY_EDITOR
             var prettyName = UnityEditor.ObjectNames.NicifyVariableName(name);
-            #else
+#else
             var prettyName = name;
-            #endif
+#endif
 
             writer.WriteNextCol(prettyName);
         }
@@ -93,6 +93,18 @@ namespace Manifold.IO
         public static void WriteStartAddress(this StreamWriter writer, IBinaryAddressable binaryAddressable)
         {
             writer.WriteNextCol(binaryAddressable.AddressRange.PrintStartAddress());
+        }
+
+
+        public static void WriteLineWithTail(this StreamWriter writer, string value, char tail, int maxLength)
+        {
+            writer.Write(value);
+            writer.Write(" ");
+
+            int tailLength = maxLength - value.Length - 1;
+            for (int i = 0; i < tailLength; i++)
+                writer.Write(tail);
+            writer.WriteLine();
         }
     }
 }
