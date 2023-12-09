@@ -95,16 +95,5 @@ namespace Manifold.IO
             writer.WriteNextCol(binaryAddressable.AddressRange.PrintStartAddress());
         }
 
-
-        public static void WriteLineWithTail(this StreamWriter writer, string value, char tail, int maxLength)
-        {
-            writer.Write(value);
-            writer.Write(" ");
-
-            int tailLength = maxLength - value.Length - 1;
-            for (int i = 0; i < tailLength; i++)
-                writer.Write(tail);
-            writer.WriteLine();
-        }
     }
 }
