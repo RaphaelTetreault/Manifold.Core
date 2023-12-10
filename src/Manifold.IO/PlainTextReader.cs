@@ -1,125 +1,117 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 namespace Manifold.IO
 {
-    public class PlainTextReader : StreamReader
+    public class PlainTextReader : IDisposable
     {
-        public PlainTextReader(Stream stream) : base(stream)
+        public int CurrentChar { get; private set; }
+        public int CurrentLine { get; private set; }
+        public int CharCount => Lines[CurrentLine].Length;
+        public int LineCount => Lines.Length;
+        public string[] Lines { get; }
+
+
+        public PlainTextReader(string path)
         {
+            Lines = File.ReadAllLines(path);
+        }
+        public PlainTextReader(Stream stream, int listCapacity = 256)
+        {
+            List<string> lines = new(listCapacity);
+            using StreamReader reader = new(stream);
+            while (!reader.EndOfStream)
+            {
+                string line = reader.ReadLine()!;
+                lines.Add(line);
+            }
+            Lines = lines.ToArray();
         }
 
-        public PlainTextReader(string path) : base(path)
+        public void SetChar(int charIndex)
         {
+            if (charIndex < 0)
+                CurrentChar = 0;
         }
-
-        public PlainTextReader(Stream stream, bool detectEncodingFromByteOrderMarks) : base(stream, detectEncodingFromByteOrderMarks)
+        public void SetLine(int lineIndex)
         {
-        }
+            if (lineIndex < 0)
+                CurrentLine = 0;
 
-        public PlainTextReader(Stream stream, Encoding encoding) : base(stream, encoding)
-        {
-        }
-
-        public PlainTextReader(string path, bool detectEncodingFromByteOrderMarks) : base(path, detectEncodingFromByteOrderMarks)
-        {
-        }
-
-        public PlainTextReader(string path, FileStreamOptions options) : base(path, options)
-        {
-        }
-
-        public PlainTextReader(string path, Encoding encoding) : base(path, encoding)
-        {
-        }
-
-        public PlainTextReader(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks) : base(stream, encoding, detectEncodingFromByteOrderMarks)
-        {
-        }
-
-        public PlainTextReader(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks) : base(path, encoding, detectEncodingFromByteOrderMarks)
-        {
-        }
-
-        public PlainTextReader(Stream stream, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize) : base(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize)
-        {
-        }
-
-        public PlainTextReader(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks, int bufferSize) : base(path, encoding, detectEncodingFromByteOrderMarks, bufferSize)
-        {
-        }
-
-        public PlainTextReader(string path, Encoding encoding, bool detectEncodingFromByteOrderMarks, FileStreamOptions options) : base(path, encoding, detectEncodingFromByteOrderMarks, options)
-        {
-        }
-
-        public PlainTextReader(Stream stream, Encoding? encoding = null, bool detectEncodingFromByteOrderMarks = true, int bufferSize = -1, bool leaveOpen = false) : base(stream, encoding, detectEncodingFromByteOrderMarks, bufferSize, leaveOpen)
-        {
+            CurrentLine = lineIndex;
         }
 
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="reader"></param>
         /// <returns>
+        ///     
         /// </returns>
         /// <remarks>
-        ///     If true, stream is after marker.
+        ///     If true, stream is positioned after marker.
         ///     If false, stream position is unchanged.
         /// </remarks>
         public bool IsArrayEndMarker()
         {
-            var position = BaseStream.Position;
-            string line = ReadLineIndent();
+            int startLine = CurrentLine;
+            string line = ReadLineIndented();
+            string marker = PlainTextWriter.ArrayMarker;
 
-            const string marker = "$ ARRAY_END";
             if (line.Length < marker.Length)
             {
-                BaseStream.Position = position;
+                CurrentLine = startLine;
                 return false;
             }
 
             bool isArrayMarker = line.Substring(0, marker.Length) == marker;
             if (!isArrayMarker)
             {
-                BaseStream.Position = position;
+                CurrentLine = startLine;
             }
             return isArrayMarker;
         }
 
-        public string ReadLineIndent()
+
+        public char Read()
         {
-            // Throw is already at end of file
-            if (BaseStream.IsAtEndOfStream())
+            string line = Lines[CurrentLine];
+
+            if (CurrentChar > line.Length)
+                return '\0'; // null character
+
+            char c = line[CurrentChar];
+            CurrentChar++;
+
+            return c;
+        }
+        public string ReadLine()
+        {
+            if (CurrentLine >= LineCount)
             {
-                string msg = "Cannot read, stream at end of file.";
+                string msg = "At end of file.";
                 throw new EndOfStreamException(msg);
             }
 
-            // Read Next valid line if able
-            long currentPosition = BaseStream.Position;
-            while (!BaseStream.IsAtEndOfStream())
+            string line = Lines[CurrentLine];
+            CurrentLine++;
+
+            return line;
+        }
+        public string ReadLineIndented()
+        {
+            while (CurrentLine < LineCount)
             {
-                // Read line
-                string line = ReadLine()!; // should not be !
-
-                /////////////////////////////////
-                // TODO: move reset to peek?
-                /////////////////////////////////
-
-                currentPosition += line.Length + 1;
-                DiscardBufferedData();
-                BaseStream.Seek(currentPosition, SeekOrigin.Begin);
+                string line = ReadLine();
 
                 // Skip empty
                 if (string.IsNullOrWhiteSpace(line))
                     continue;
 
-                // clean whitespace
+                // Clean whitespace
                 line = line.Trim();
 
-                // skip comments
+                // Skip comments
                 if (line[0] == '#')
                     continue;
 
@@ -129,67 +121,78 @@ namespace Manifold.IO
 
             // Indicate no valid line could be read
             {
-                string msg = "Could not find another line to read.";
-                throw new System.IO.EndOfStreamException(msg);
+                string msg = "No value-based line remaining in file.";
+                throw new EndOfStreamException(msg);
             }
         }
-        public string ReadLineValue()
+
+        public string ReadValue()
         {
-            string line = ReadLineIndent();
+            string line = ReadLineIndented();
             string[] segments = line.Split(':');
             string valueText = segments[^1];
             valueText = valueText.Trim();
             return valueText;
         }
-        public void ReadLineValue<T>(ref T value, Func<string, T> parse)
+        public void ReadValue<T>(ref T value, Func<string, T> parse)
         {
-            string valueText = ReadLineValue();
+            string valueText = ReadValue();
             value = parse.Invoke(valueText);
         }
-        public void ReadLineValue(ref string value)
+        public void ReadValue(ref string value)
         {
-            value = ReadLineValue();
+            value = ReadValue();
         }
-        public void ReadLineValue(ref byte value)
-            => ReadLineValue(ref value, byte.Parse);
-        public void ReadLineValue(ref ushort value)
-            => ReadLineValue(ref value, ushort.Parse);
-        public void ReadLineValue(ref uint value)
-            => ReadLineValue(ref value, uint.Parse);
-        public void ReadLineValue(ref ulong value)
-            => ReadLineValue(ref value, ulong.Parse);
-        public void ReadLineValue(ref sbyte value)
-            => ReadLineValue(ref value, sbyte.Parse);
-        public void ReadLineValue(ref short value)
-            => ReadLineValue(ref value, short.Parse);
-        public void ReadLineValue(ref int value)
-            => ReadLineValue(ref value, int.Parse);
-        public void ReadLineValue(ref long value)
-            => ReadLineValue(ref value, long.Parse);
-        public void ReadLineValue(ref float value)
-            => ReadLineValue(ref value, float.Parse);
-        public void ReadLineValue(ref double value)
-            => ReadLineValue(ref value, double.Parse);
-        public void ReadLineValue<TEnum>(ref TEnum value, byte _ = 0)
+        public void ReadValue(ref byte value)
+            => ReadValue(ref value, byte.Parse);
+        public void ReadValue(ref ushort value)
+            => ReadValue(ref value, ushort.Parse);
+        public void ReadValue(ref uint value)
+            => ReadValue(ref value, uint.Parse);
+        public void ReadValue(ref ulong value)
+            => ReadValue(ref value, ulong.Parse);
+        public void ReadValue(ref sbyte value)
+            => ReadValue(ref value, sbyte.Parse);
+        public void ReadValue(ref short value)
+            => ReadValue(ref value, short.Parse);
+        public void ReadValue(ref int value)
+            => ReadValue(ref value, int.Parse);
+        public void ReadValue(ref long value)
+            => ReadValue(ref value, long.Parse);
+        public void ReadValue(ref float value)
+            => ReadValue(ref value, float.Parse);
+        public void ReadValue(ref double value)
+            => ReadValue(ref value, double.Parse);
+        public void ReadValue<TEnum>(ref TEnum value, byte _ = 0)
             where TEnum : struct, Enum
-            => ReadLineValue(ref value,
-                (string str) => { return Enum.Parse<TEnum>(str, true); }
-            );
-        public void ReadLineValue<TPlainTextSerializable>( ref TPlainTextSerializable value)
-            where TPlainTextSerializable : IPlainTextSerializable, new()
-            => ReadLineValue(ref value,
-                (string str) =>
-                {
-                    var textSerializable = new TPlainTextSerializable();
-                    textSerializable.Deserialize(this);
-                    return textSerializable;
-                }
-            );
+        {
+            TEnum ParseEnum(string str)
+            {
+                return Enum.Parse<TEnum>(str, true);
+            };
+            ReadValue(ref value, ParseEnum);
 
-        public void SerializeIndent<TPlainTextSerializable>(TPlainTextSerializable serializable)
+        }
+        public void ReadValue<TPlainTextSerializable>(ref TPlainTextSerializable value)
+            where TPlainTextSerializable : IPlainTextSerializable, new()
+        {
+            TPlainTextSerializable ParsePlainTextSerializable(string str)
+            {
+                var textSerializable = new TPlainTextSerializable();
+                textSerializable.Deserialize(this);
+                return textSerializable;
+            };
+            ReadValue(ref value, ParsePlainTextSerializable);
+        }
+        public void DerializeIndented<TPlainTextSerializable>(TPlainTextSerializable serializable)
             where TPlainTextSerializable : IPlainTextSerializable
         {
             serializable.Deserialize(this);
+        }
+
+        public void Dispose()
+        {
+            // "Fake" implementation to stay consistent with Writer
         }
     }
 }
