@@ -118,5 +118,40 @@ namespace Manifold.IO
         {
             return string.Compare(this, other);
         }
+
+        public bool IsEquivilentTo(CString other)
+        {
+            bool isEquivilent = CompareTo(other) == 0;
+            return isEquivilent;
+        }
+
+        public static void MergeReferences<TCString>(ref TCString[] strings)
+            where TCString : CString
+        {
+            // For loops written such that:
+            //  Value A does not compare against A
+            //  Values B and A are evaluated
+            //  Values A and B are NOT evaluated
+
+            for (int i = 0; i < strings.Length; i++)
+            {
+                ref TCString a = ref strings[i];
+                
+                for (int j = 0; j <= i; j++)
+                {
+                    // skip comparing self
+                    if (i == j)
+                        continue;
+
+                    ref TCString b = ref strings[j];
+
+                    // Mutate reference such that B points to A
+                    if (b.IsEquivilentTo(a))
+                    {
+                        b = a;
+                    }
+                }
+            }
+        }
     }
 }
