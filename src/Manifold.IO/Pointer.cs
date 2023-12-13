@@ -1,5 +1,4 @@
 using System;
-using System.IO;
 
 namespace Manifold.IO
 {
@@ -9,6 +8,9 @@ namespace Manifold.IO
         IEquatable<Pointer>,
         IPointer
     {
+        // CONSTANTS
+        public static readonly Pointer Null = 0;
+
         // FIELDS
         public int address;
 
