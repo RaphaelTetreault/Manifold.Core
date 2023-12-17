@@ -53,10 +53,13 @@
         {
             array = System.Array.Empty<TBinarySerializable>();
         }
-        public ArrayPointer32(int address, int length)
+        public ArrayPointer32(ArrayPointer arrayPointer) : this()
         {
-            arrayPointer = new ArrayPointer(length, address);
-            array = new TBinarySerializable[length];
+            this.arrayPointer = arrayPointer;
+        }
+        public ArrayPointer32(int address, int length) : this(new ArrayPointer(length, address))
+        {
+
         }
         public ArrayPointer32(params TBinarySerializable[] values)
         {
@@ -72,15 +75,34 @@
 
         public void DeserializeArray(EndianBinaryReader reader)
         {
+            array = GetDeserializedArray(reader);
+
+            //// Get address to return to after deserializing
+            //Pointer currentAddress = reader.GetPositionAsPointer();
+
+            //// Jump to address and deserialize values
+            //reader.JumpToAddress(arrayPointer);
+            //reader.Read(ref array, arrayPointer.length);
+
+            //// Return to initial address
+            //reader.JumpToAddress(currentAddress);
+        }
+
+        public TBinarySerializable[] GetDeserializedArray(EndianBinaryReader reader)
+        {
             // Get address to return to after deserializing
             Pointer currentAddress = reader.GetPositionAsPointer();
 
             // Jump to address and deserialize values
             reader.JumpToAddress(arrayPointer);
-            reader.Read(ref array, arrayPointer.length);
+            var localArray = System.Array.Empty<TBinarySerializable>();
+            reader.Read(ref localArray, arrayPointer.length);
 
             // Return to initial address
             reader.JumpToAddress(currentAddress);
+
+            // return array
+            return localArray;
         }
 
         public void Serialize(EndianBinaryWriter writer)
