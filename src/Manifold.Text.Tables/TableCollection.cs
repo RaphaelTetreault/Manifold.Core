@@ -3,17 +3,17 @@ using System.Collections.Generic;
 
 namespace Manifold.IO
 {
-    public class XTableCollection
+    public class TableCollection
     // IEnumerable?
     // ICollection?
     {
         protected delegate bool CompareStrings(string a, string b);
 
-        protected List<XTable> tables = new();
-        public XTable CurrentTable { get; private set; } = new();
+        protected List<Table> tables = new();
+        public Table CurrentTable { get; private set; } = new();
          
 
-        public XTable GetTable(int index)
+        public Table GetTable(int index)
         {
             bool isInvalidRange = index >= tables.Count;
             if (isInvalidRange)
@@ -24,21 +24,21 @@ namespace Manifold.IO
                 throw new IndexOutOfRangeException(msg);
             }
 
-            XTable table = tables[index];
+            Table table = tables[index];
             return table;
         }
-        public XTable? GetTable(string name, bool isCaseInsensitive = false)
+        public Table? GetTable(string name, bool isCaseInsensitive = false)
         {
             CompareStrings compare = GetCompareStringsFunction(isCaseInsensitive);
-            foreach (XTable table in tables)
+            foreach (Table table in tables)
                 if (compare(table.Name, name))
                     return table;
 
             return null;
         }
-        public XTable GetTableOrError(string name, bool isCaseInsensitive = false)
+        public Table GetTableOrError(string name, bool isCaseInsensitive = false)
         {
-            XTable? table = GetTable(name, isCaseInsensitive);
+            Table? table = GetTable(name, isCaseInsensitive);
 
             if (table == null)
             {
@@ -52,12 +52,12 @@ namespace Manifold.IO
 
         public void SetTable(int index)
         {
-            XTable table = tables[index];
+            Table table = tables[index];
             CurrentTable = table;
         }
         public void SetTable(string name, bool isCaseInsensitive)
         {
-            XTable table = GetTableOrError(name, isCaseInsensitive);
+            Table table = GetTableOrError(name, isCaseInsensitive);
             CurrentTable = table;
         }
 
@@ -92,7 +92,7 @@ namespace Manifold.IO
         //      Above, but any gaps are considered split between tables
         // Position data array?
         //      offsets xy, wh, header wh, name y/n
-        public static XTableCollection FromFile()
+        public static TableCollection FromFile()
         {
             throw new NotImplementedException();
         }

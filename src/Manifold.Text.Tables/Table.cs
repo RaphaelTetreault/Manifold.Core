@@ -9,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Manifold.IO
 {
-    public class XTable
+    public class Table
     {
         public string Name { get; set; } = string.Empty;
         public int ColHeadersCount { get; set; }

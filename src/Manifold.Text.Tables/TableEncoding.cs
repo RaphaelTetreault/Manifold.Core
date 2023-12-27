@@ -1,6 +1,6 @@
 ﻿namespace Manifold.IO
 {
-    public abstract class XTableEncoding
+    public abstract class TableEncoding
     {
         public abstract string ColSeparator { get; }
         public abstract string RowSeparator { get; }

@@ -1,6 +1,6 @@
 ﻿namespace Manifold.IO
 {
-    public sealed class XTableEncodingCSV : XTableEncoding
+    public sealed class TableEncodingCSV : TableEncoding
     {
         private static readonly string[] expectedFileExtensions =
             new string[] { ".csv" };
