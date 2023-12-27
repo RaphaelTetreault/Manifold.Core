@@ -1,4 +1,6 @@
-﻿namespace Manifold.Text.Tables
+﻿using System;
+
+namespace Manifold.Text.Tables
 {
     public interface ITableInterface
     {

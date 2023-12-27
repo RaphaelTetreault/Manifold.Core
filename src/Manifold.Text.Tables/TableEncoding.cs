@@ -1,4 +1,4 @@
-﻿namespace Manifold.IO
+﻿namespace Manifold.Text.Tables
 {
     public abstract class TableEncoding
     {
