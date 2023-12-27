@@ -1,12 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 
-// Considerations
-// 1. Make the underlying collection a buffer with a way to infer row/col?
-//    Perhaps that means List<List<string>> ?
-//    IDK what the memory overhead looks like.
-//    Maybe implement a "growing" [,] like list?
-
 // TODO: CopyTo table?
 
 namespace Manifold.Text.Tables
@@ -14,6 +8,8 @@ namespace Manifold.Text.Tables
     public class Table
     {
         private const int DefaultSize = 32;
+        public delegate string GetValueOnAxis(out bool isAtEndOfAxis);
+
 
         public string Name { get; set; } = string.Empty;
         public int ColHeadersCount { get; set; }
@@ -29,27 +25,33 @@ namespace Manifold.Text.Tables
 
         private int InternalWidth => ValueRows.GetLength(0);
         private int InternalHeight => ValueRows.GetLength(1);
-        private Func<string> ActiveGetNextFunction { get; set; }
+        private GetValueOnAxis GetNextFromAxis { get; set; }
         private bool CanAddVertically => Height < InternalHeight;
         private bool CanAddHorizontally => Width < InternalWidth;
 
 
+        // CONSTRUCTORS
         public Table()
         {
             HardReset();
-            ActiveGetNextFunction = GetNextFromRow;
+            GetNextFromAxis = GetNextFromRow;
             SetTableAxis(ReadNextAxis);
         }
 
 
+        // METHODS
         public string GetNext()
+            => GetNext(out _);
+        public string GetNext(out bool isAtEndOfAxis)
         {
-            string value = ActiveGetNextFunction.Invoke();
+            string value = GetNextFromAxis.Invoke(out isAtEndOfAxis);
             return value;
         }
         public T GetNextAs<T>(Func<string, T> parse)
+            => GetNextAs(parse, out _);
+        public T GetNextAs<T>(Func<string, T> parse, out bool isAtEndOfAxis)
         {
-            string strValue = GetNext();
+            string strValue = GetNext(out isAtEndOfAxis);
             T value = parse.Invoke(strValue);
             return value;
         }
@@ -78,21 +80,27 @@ namespace Manifold.Text.Tables
             throw new KeyNotFoundException(msg);
         }
         public string GetNextFromRow()
+            => GetNextFromRow(out _);
+        public string GetNextFromRow(out bool isAtEndOfRow)
         {
             string value = GetDataCell(ActiveRow, ActiveCol);
 
+            isAtEndOfRow = false;
             ActiveRow++;
             if (ActiveRow >= Height)
             {
                 ActiveRow = ColHeadersCount;
                 ActiveCol++;
+                isAtEndOfRow = true;
             }
 
             return value;
         }
         public T GetNextFromRowAs<T>(Func<string, T> parse)
+            => GetNextFromRowAs(parse, out _);
+        public T GetNextFromRowAs<T>(Func<string, T> parse, out bool isAtEndOfRow)
         {
-            string strValue = GetNextFromRow();
+            string strValue = GetNextFromRow(out isAtEndOfRow);
             T value = parse.Invoke(strValue);
             return value;
         }
@@ -131,21 +139,27 @@ namespace Manifold.Text.Tables
             throw new KeyNotFoundException(msg);
         }
         public string GetNextFromCol()
+            => GetNextFromCol(out _);
+        public string GetNextFromCol(out bool isAtEndOfCol)
         {
             string value = GetDataCell(ActiveRow, ActiveCol);
 
+            isAtEndOfCol = false;
             ActiveCol++;
             if (ActiveCol >= Width)
             {
                 ActiveCol = RowHeadersCount;
                 ActiveRow++;
+                isAtEndOfCol = true;
             }
 
             return value;
         }
         public T GetNextFromColAs<T>(Func<string, T> parse)
+            => GetNextFromColAs(parse, out _);
+        public T GetNextFromColAs<T>(Func<string, T> parse, out bool isAtEndOfCol)
         {
-            string strValue = GetNextFromCol();
+            string strValue = GetNextFromCol(out isAtEndOfCol);
             T value = parse.Invoke(strValue);
             return value;
         }
@@ -230,30 +244,29 @@ namespace Manifold.Text.Tables
             switch (tableAxis)
             {
                 case TableAxis.Horizontal:
-                    ActiveGetNextFunction = GetNextFromCol;
+                    GetNextFromAxis = GetNextFromCol;
                     break;
 
                 case TableAxis.Vertical:
-                    ActiveGetNextFunction = GetNextFromRow;
+                    GetNextFromAxis = GetNextFromRow;
                     break;
 
                 default:
                     throw new NotImplementedException();
             }
         }
-
         // Set row, col, cells?
 
 
         private void ExpandHorizontally()
         {
             // Calculate new width
-            int width = InternalWidth * 2;
+            int newWidth = InternalWidth * 2;
             // Double horizontal size of each row
             for (int y = 0; y < InternalHeight; y++)
             {
                 string[] row = ValueRows[y];
-                string[] newRow = ArrayUtility.DefaultArray(string.Empty, width);
+                string[] newRow = ArrayUtility.DefaultArray(string.Empty, newWidth);
                 row.CopyTo(newRow, 0);
                 ValueRows[y] = newRow;
             }
@@ -388,6 +401,11 @@ namespace Manifold.Text.Tables
             return true;
         }
         public bool RemoveCol(int colIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        public static Table FromArea(string[][] cells, TableArea area)
         {
             throw new NotImplementedException();
         }
