@@ -2,20 +2,20 @@
 {
     public struct TableArea
     {
-        public ushort x;
-        public ushort y;
+        public string name;
+        public ushort posX;
+        public ushort posY;
         public uint width;
         public uint height;
         public byte colHeaderCount;
         public byte rowHeaderCount;
-        public bool hasName;
 
-        public int BeginX => x;
-        public int BeginRow => y;
-        public int EndX => (int)(x + width);
-        public int EndRow => (int)(y + height);
-        public int NumberOfRows => (int)(width - x);
-        public int NumberOfCols => (int)(height - y);
+        public int BeginColumn => posX;
+        public int BeginRow => posY;
+        public int EndColumn => (int)(posX + width);
+        public int EndRow => (int)(posY + height);
+        public int NumberOfRows => (int)(width - posX);
+        public int NumberOfCols => (int)(height - posY);
 
     }
 }

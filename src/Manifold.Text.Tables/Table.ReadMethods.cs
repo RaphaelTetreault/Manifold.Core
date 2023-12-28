@@ -22,20 +22,23 @@ namespace Manifold.Text.Tables
         private static readonly ParseType<decimal> ParseDecimal = decimal.Parse;
         private static readonly ParseType<DateTime> ParseDateTime = DateTime.Parse;
 
-        private static ParseType<byte> ParseUInt8WithStyle(NumberStyles numberStyles) => (string str) => { return byte.Parse(str, numberStyles); };
-        private static ParseType<ushort> ParseUInt16WithStyle(NumberStyles numberStyles) => (string str) => { return ushort.Parse(str, numberStyles); };
-        private static ParseType<uint> ParseUInt32WithStyle(NumberStyles numberStyles) => (string str) => { return uint.Parse(str, numberStyles); };
-        private static ParseType<ulong> ParseUInt64WithStyle(NumberStyles numberStyles) => (string str) => { return ulong.Parse(str, numberStyles); };
-        private static ParseType<UInt128> ParseUInt128WithStyle(NumberStyles numberStyles) => (string str) => { return UInt128.Parse(str, numberStyles); };
-        private static ParseType<sbyte> ParseInt8WithStyle(NumberStyles numberStyles) => (string str) => { return sbyte.Parse(str, numberStyles); };
-        private static ParseType<short> ParseInt16WithStyle(NumberStyles numberStyles) => (string str) => { return short.Parse(str, numberStyles); };
-        private static ParseType<int> ParseInt32WithStyle(NumberStyles numberStyles) => (string str) => { return int.Parse(str, numberStyles); };
-        private static ParseType<long> ParseInt64WithStyle(NumberStyles numberStyles) => (string str) => { return long.Parse(str, numberStyles); };
-        private static ParseType<Int128> ParseInt128WithStyle(NumberStyles numberStyles) => (string str) => { return Int128.Parse(str, numberStyles); };
-        private static ParseType<float> ParseFloatWithStyle(NumberStyles numberStyles) => (string str) => { return float.Parse(str, numberStyles); };
-        private static ParseType<double> ParseDoubleWithStyle(NumberStyles numberStyles) => (string str) => { return double.Parse(str, numberStyles); };
-        private static ParseType<decimal> ParseDecimalWithStyle(NumberStyles numberStyles) => (string str) => { return decimal.Parse(str, numberStyles); };
-        private static ParseType<DateTime> ParseDateTimeWithStyle(IFormatProvider dateTimeFormatProvider) => (string str) => { return DateTime.Parse(str, dateTimeFormatProvider); };
+        public static ParseType<byte> ParseUInt8WithStyle(NumberStyles numberStyles) => (string str) => { return byte.Parse(str, numberStyles); };
+        public static ParseType<ushort> ParseUInt16WithStyle(NumberStyles numberStyles) => (string str) => { return ushort.Parse(str, numberStyles); };
+        public static ParseType<uint> ParseUInt32WithStyle(NumberStyles numberStyles) => (string str) => { return uint.Parse(str, numberStyles); };
+        public static ParseType<ulong> ParseUInt64WithStyle(NumberStyles numberStyles) => (string str) => { return ulong.Parse(str, numberStyles); };
+        public static ParseType<UInt128> ParseUInt128WithStyle(NumberStyles numberStyles) => (string str) => { return UInt128.Parse(str, numberStyles); };
+        public static ParseType<sbyte> ParseInt8WithStyle(NumberStyles numberStyles) => (string str) => { return sbyte.Parse(str, numberStyles); };
+        public static ParseType<short> ParseInt16WithStyle(NumberStyles numberStyles) => (string str) => { return short.Parse(str, numberStyles); };
+        public static ParseType<int> ParseInt32WithStyle(NumberStyles numberStyles) => (string str) => { return int.Parse(str, numberStyles); };
+        public static ParseType<long> ParseInt64WithStyle(NumberStyles numberStyles) => (string str) => { return long.Parse(str, numberStyles); };
+        public static ParseType<Int128> ParseInt128WithStyle(NumberStyles numberStyles) => (string str) => { return Int128.Parse(str, numberStyles); };
+        public static ParseType<float> ParseFloatWithStyle(NumberStyles numberStyles) => (string str) => { return float.Parse(str, numberStyles); };
+        public static ParseType<double> ParseDoubleWithStyle(NumberStyles numberStyles) => (string str) => { return double.Parse(str, numberStyles); };
+        public static ParseType<decimal> ParseDecimalWithStyle(NumberStyles numberStyles) => (string str) => { return decimal.Parse(str, numberStyles); };
+        public static ParseType<DateTime> ParseDateTimeWithStyle(IFormatProvider dateTimeFormatProvider) => (string str) => { return DateTime.Parse(str, dateTimeFormatProvider); };
+        public static ParseType<TEnum> ParseEnum<TEnum>() where TEnum : struct, Enum => Enum.Parse<TEnum>;
+        public static ParseType<TEnum> ParseEnum<TEnum>(bool ignoreCase) where TEnum : struct, Enum => (string value) => { return Enum.Parse<TEnum>(value, ignoreCase); };
+
 
 
         #region BOOL
