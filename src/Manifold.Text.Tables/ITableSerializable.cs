@@ -2,7 +2,8 @@
 {
     public interface ITableSerializable
     {
-        public void Deserialize(Table table); // TODO: contrain further, interface?
-        public void Serialize(Table table);
+        public void Deserialize(TableCollection tableCollection);
+        public void Serialize(TableCollection tableCollection);
+        public string[] GetHeaders();
     }
 }

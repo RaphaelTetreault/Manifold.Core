@@ -9,6 +9,7 @@ namespace Manifold.Text.Tables
     {
         private const int DefaultSize = 32;
         public delegate string GetValueOnAxis(out bool isAtEndOfAxis);
+        public delegate void SetValueOnAxis(string value);
         public delegate T ParseType<T>(string value);
 
         // Public state
@@ -19,7 +20,7 @@ namespace Manifold.Text.Tables
         public int DataHeight { get; private set; }
         public int FullWidth => RowHeadersCount + DataWidth;
         public int FullHeight => ColumnHeadersCount + DataHeight;
-        public TableAxis GetNextAxis { get; private set; } = TableAxis.Horizontal;
+        public TableAxis GetSetNextAxis { get; private set; } = TableAxis.Horizontal;
         public bool HasRowHeaders => RowHeadersCount > 0;
         public bool HasColumnHeaders => ColumnHeadersCount > 0;
         public string Name { get; set; } = string.Empty;
@@ -28,7 +29,8 @@ namespace Manifold.Text.Tables
         // Private state
         private bool CanAddVertically => DataHeight < InternalHeight;
         private bool CanAddHorizontally => DataWidth < InternalWidth;
-        private GetValueOnAxis GetNextFromAxis { get; set; }
+        private GetValueOnAxis GetNextOnAxis { get; set; }
+        private SetValueOnAxis SetNextOnAxis { get; set; }
         private int InternalWidth => TableRowsAndColumns.GetLength(0);
         private int InternalHeight => TableRowsAndColumns.GetLength(1);
 
@@ -37,10 +39,9 @@ namespace Manifold.Text.Tables
         public Table()
         {
             HardReset();
-            GetNextFromAxis = GetNextFromRow;
-            SetTableGetNextAxis(GetNextAxis);
+            GetNextOnAxis = GetNextFromDataRow;
+            SetTableGetNextAxis(GetSetNextAxis);
         }
-
 
         // METHODS
         // GET / SET
@@ -156,10 +157,10 @@ namespace Manifold.Text.Tables
             return header;
         }
         public string GetNext()
-        => GetNext(out _);
+            => GetNext(out _);
         public string GetNext(out bool isAtEndOfAxis)
         {
-            string value = GetNextFromAxis.Invoke(out isAtEndOfAxis);
+            string value = GetNextOnAxis.Invoke(out isAtEndOfAxis);
             return value;
         }
         public T GetNextAs<T>(ParseType<T> parse)
@@ -195,9 +196,9 @@ namespace Manifold.Text.Tables
             T value = parse.Invoke(strValue);
             return value;
         }
-        public string GetNextFromRow()
-        => GetNextFromRow(out _);
-        public string GetNextFromRow(out bool isAtEndOfRow)
+        public string GetNextFromDataRow()
+        => GetNextFromDataRow(out _);
+        public string GetNextFromDataRow(out bool isAtEndOfRow)
         {
             string value = GetDataCell(ActiveDataRow, ActiveDataCol);
 
@@ -216,27 +217,11 @@ namespace Manifold.Text.Tables
             => GetNextFromDataRowAs(parse, out _);
         public T GetNextFromDataRowAs<T>(ParseType<T> parse, out bool isAtEndOfRow)
         {
-            string strValue = GetNextFromRow(out isAtEndOfRow);
+            string strValue = GetNextFromDataRow(out isAtEndOfRow);
             T value = parse.Invoke(strValue);
             return value;
         }
-        public void SetDataRow(int rowIndex, string[] data)
-        {
-            data.CopyTo(TableRowsAndColumns[rowIndex], RowHeadersCount);
-        }
-        public void SetHeaderRow(int rowIndex, string[] headers)
-        {
-            headers.CopyTo(TableRowsAndColumns[rowIndex], 0);
-        }
-        public void SetFullRow(int rowIndex, string[] fullRow)
-        {
-            fullRow.CopyTo(TableRowsAndColumns[rowIndex], 0);
-        }
-        public void SetRow(int rowIndex, string[] data, params string[] headers)
-        {
-            SetHeaderRow(rowIndex, headers);
-            SetDataRow(rowIndex, data);
-        }
+        //
         public void SetColumn(int columnIndex, string[] data, params string[] headers)
         {
             SetHeaderColumn(columnIndex, headers);
@@ -249,37 +234,119 @@ namespace Manifold.Text.Tables
             for (; dstRowIndex < FullHeight; srcRowIndex++, dstRowIndex++)
                 TableRowsAndColumns[dstRowIndex][columnIndex] = data[srcRowIndex];
         }
+        public void SetDataRow(int rowIndex, string[] data)
+        {
+            data.CopyTo(TableRowsAndColumns[rowIndex], RowHeadersCount);
+        }
         public void SetHeaderColumn(int colIndex, string[] headers)
         {
             for (int rowIndex = 0; rowIndex < headers.Length; rowIndex++)
                 TableRowsAndColumns[rowIndex][colIndex] = headers[rowIndex];
+        }
+        public void SetHeaderRow(int rowIndex, string[] headers)
+        {
+            headers.CopyTo(TableRowsAndColumns[rowIndex], 0);
         }
         public void SetFullColumn(int colIndex, string[] fullColumn)
         {
             for (int rowIndex = 0; rowIndex < FullHeight; rowIndex++)
                 TableRowsAndColumns[rowIndex][colIndex] = fullColumn[rowIndex];
         }
+        public void SetFullRow(int rowIndex, string[] fullRow)
+        {
+            fullRow.CopyTo(TableRowsAndColumns[rowIndex], 0);
+        }
+        public void SetRow(int rowIndex, string[] data, params string[] headers)
+        {
+            SetHeaderRow(rowIndex, headers);
+            SetDataRow(rowIndex, data);
+        }
+
         public void SetTableGetNextAxis(TableAxis tableAxis)
         {
-            bool doesNotRequireUpdate = GetNextAxis == tableAxis;
+            bool doesNotRequireUpdate = GetSetNextAxis == tableAxis;
             if (doesNotRequireUpdate)
                 return;
 
-            GetNextAxis = tableAxis;
+            GetSetNextAxis = tableAxis;
             switch (tableAxis)
             {
                 case TableAxis.Horizontal:
-                    GetNextFromAxis = GetNextFromDataColumn;
+                    GetNextOnAxis = GetNextFromDataColumn;
+                    SetNextOnAxis = SetNextInDataColumn;
                     break;
 
                 case TableAxis.Vertical:
-                    GetNextFromAxis = GetNextFromRow;
+                    GetNextOnAxis = GetNextFromDataRow;
+                    SetNextOnAxis = SetNextInDataRow;
                     break;
 
                 default:
                     throw new NotImplementedException();
             }
         }
+
+        public void SetCell(int rowIndex, int columnIndex, string value)
+        {
+            AssertCellIndex(rowIndex, columnIndex);
+            TableRowsAndColumns[rowIndex][columnIndex] = value;
+        }
+        public void SetDataCell(int rowIndex, int columnIndex, string value)
+        {
+            rowIndex += ColumnHeadersCount;
+            columnIndex += RowHeadersCount;
+            AssertDataCellIndex(rowIndex, columnIndex);
+            SetCell(rowIndex, columnIndex, value);
+        }
+        public void SetNext(object value) => SetNext(value.ToString()!);
+        public void SetNext(string value)
+        {
+            SetNextOnAxis.Invoke(value);
+        }
+        public void SetNextInDataColumn(string value)
+        {
+            CheckExpandHorizontally();
+            SetDataCell(ActiveDataRow, ActiveDataCol, value);
+            ActiveDataCol++;
+        }
+        public void SetNextInDataRow(string value)
+        {
+            CheckExpandVertically();
+            SetDataCell(ActiveDataRow, ActiveDataCol, value);
+            ActiveDataRow++;
+        }
+        public void SetNextLine()
+        {
+            switch (GetSetNextAxis)
+            {
+                case TableAxis.Horizontal:
+                    ActiveDataRow++;
+                    ActiveDataCol = 0;
+                    break;
+
+                case TableAxis.Vertical:
+                    ActiveDataRow = 0;
+                    ActiveDataCol++;
+                    break;
+
+                default:
+                    throw new NotImplementedException($"{GetSetNextAxis}");
+            }
+        }
+
+
+        public void CheckExpandVertically()
+        {
+            if (!CanAddVertically)
+                ExpandVertically();
+        }
+        public void CheckExpandHorizontally()
+        {
+            if (!CanAddHorizontally)
+                ExpandHorizontally();
+        }
+
+
         // TABLE OPERATIONS
         public void AppendColumn()
         {
@@ -290,9 +357,7 @@ namespace Manifold.Text.Tables
         {
             AssertColsCount(col.Length, headers.Length);
 
-            if (!CanAddVertically)
-                ExpandVertically();
-
+            CheckExpandHorizontally();
             SetColumn(FullWidth, col, headers);
             DataWidth++;
         }
@@ -305,9 +370,7 @@ namespace Manifold.Text.Tables
         {
             AssertRowsCount(row.Length, headers.Length);
 
-            if (!CanAddHorizontally)
-                ExpandVertically();
-
+            CheckExpandVertically();
             SetRow(FullHeight, row, headers);
             DataHeight++;
         }
@@ -374,8 +437,7 @@ namespace Manifold.Text.Tables
         {
             AssertColsCount(colValues.Length, headers.Length);
 
-            if (!CanAddHorizontally)
-                ExpandHorizontally();
+            CheckExpandHorizontally();
 
             for (int r = 0; r > FullHeight; r++) // each row, 0-n
                 for (int c = FullWidth; c > colIndex; c--) // each col, n-colIndex
@@ -393,8 +455,7 @@ namespace Manifold.Text.Tables
         {
             AssertRowsCount(rowValues.Length, headers.Length);
 
-            if (!CanAddVertically)
-                ExpandVertically();
+            CheckExpandVertically();
 
             // shift rows at index down 1
             rowIndex += ColumnHeadersCount;
@@ -611,7 +672,7 @@ namespace Manifold.Text.Tables
         public static Table FromArea(string[][] cells, TableArea area)
         {
             Table table = new Table();
-            
+
             // Create empty table to input data into
             table.TableRowsAndColumns = ArrayUtility.DefaultArray2D(string.Empty, area.NumberOfRows, area.NumberOfCols);
             // Copy subset of rows into table
@@ -634,7 +695,7 @@ namespace Manifold.Text.Tables
             int rowCount = cells.Length;
             int colCount = 0;
             for (int row = 0; row < cells.GetLength(0); row++)
-               colCount = cells[row].Length > colCount ? cells[row].Length : colCount;
+                colCount = cells[row].Length > colCount ? cells[row].Length : colCount;
 
             // Set dimensions
             Table table = new Table();
