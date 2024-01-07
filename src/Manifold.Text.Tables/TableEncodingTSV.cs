@@ -2,6 +2,7 @@
 {
     public sealed class TableEncodingTSV : TableEncoding
     {
+        public static readonly TableEncodingTSV Encoding = new();
         private static readonly string[] expectedFileExtensions =
             new string[] { ".tsv" };
 

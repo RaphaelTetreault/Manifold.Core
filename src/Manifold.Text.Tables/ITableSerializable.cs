@@ -2,8 +2,8 @@
 {
     public interface ITableSerializable
     {
-        public void Deserialize(TableCollection tableCollection);
-        public void Serialize(TableCollection tableCollection);
+        public void ReadCells(Table table);
+        public void WriteCells(Table table);
         public string[] GetHeaders();
     }
 }
