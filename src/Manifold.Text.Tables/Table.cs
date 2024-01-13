@@ -48,8 +48,8 @@ namespace Manifold.Text.Tables
         // Private state
         private GetValueOnAxis GetNextOnAxis { get; set; }
         private SetValueOnAxis SetNextOnAxis { get; set; }
-        private int InternalWidth { get; set; } = DefaultSize;
-        private int InternalHeight { get; set; } = DefaultSize;
+        internal int InternalWidth { get; set; } = DefaultSize;
+        internal int InternalHeight { get; set; } = DefaultSize;
 
 
         // CONSTRUCTORS
@@ -685,9 +685,8 @@ namespace Manifold.Text.Tables
             // Copy old values into new array
             valueRows.CopyTo(TableRowsAndColumns, 0);
             // Create new entries
-            string[] defaultArray = ArrayUtility.DefaultArray(string.Empty, InternalWidth);
             for (int y = oldHeight; y < newHeight; y++)
-                TableRowsAndColumns[y] = defaultArray;
+                TableRowsAndColumns[y] = ArrayUtility.DefaultArray(string.Empty, InternalWidth);
         }
 
 
