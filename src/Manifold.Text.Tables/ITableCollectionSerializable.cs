@@ -2,7 +2,7 @@
 {
     public interface ITableCollectionSerializable
     {
-        public void AddToTables(TableCollection tableCollection);
-        public void GetTables(TableCollection tableCollection);
+        public void ToTables(TableCollection tableCollection);
+        public void FromTables(TableCollection tableCollection);
     }
 }
