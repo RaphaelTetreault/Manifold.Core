@@ -1,7 +1,7 @@
 ﻿using System;
 namespace Manifold.IO
 {
-    public sealed class XTableEncodingTSV : XTableEncoding
+    public sealed class TableEncodingTSV : TableEncoding
     {
         private static readonly string[] expectedFileExtensions =
             new string[] { ".tsv" };
