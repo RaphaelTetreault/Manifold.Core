@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Manifold.IO
+namespace Manifold.Text.Tables
 {
     public class TableCollection
     // IEnumerable?

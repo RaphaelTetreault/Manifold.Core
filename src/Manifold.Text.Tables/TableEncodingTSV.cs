@@ -1,5 +1,4 @@
-﻿using System;
-namespace Manifold.IO
+﻿namespace Manifold.Text.Tables
 {
     public sealed class TableEncodingTSV : TableEncoding
     {
