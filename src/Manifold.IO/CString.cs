@@ -154,4 +154,15 @@ namespace Manifold.IO
             }
         }
     }
+
+    public static class CStringExtensions
+    {
+        public static string[] AsStringArray(this CString[] array)
+        {
+            string[] strings = new string[array.Length];
+            for (int i = 0; array.Length > i; i++)
+                strings[i] = array[i];
+            return strings;
+        }
+    }
 }
