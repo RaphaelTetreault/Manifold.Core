@@ -182,12 +182,15 @@ namespace Manifold.IO
         #endregion
 
         /// <summary>
-        /// Moves the <paramref name="reader"/>'s stream position to the <paramref name="pointer"/>'s address.
+        /// Moves the <paramref name="writer"/>'s stream position to the <paramref name="pointer"/>'s address.
         /// </summary>
-        /// <param name="reader">The writer to jump in.</param>
+        /// <param name="writer">The writer to jump in.</param>
         /// <param name="pointer">The pointer to jump to.</param>
-        public static void JumpToAddress(this EndianBinaryWriter writer, Pointer pointer)
+        public static void JumpToAddress(this EndianBinaryWriter writer, Pointer pointer, bool canJumpToNull = false)
         {
+            if (!canJumpToNull && pointer.IsNull)
+                throw new Exception($"{nameof(Pointer)} is null!");
+
             writer.BaseStream.Seek(pointer.address, SeekOrigin.Begin);
         }
 
@@ -196,8 +199,11 @@ namespace Manifold.IO
         /// </summary>
         /// <param name="writer">The writer to jump in.</param>
         /// <param name="arrayPointer">The pointer to jump to.</param>
-        public static void JumpToAddress(this EndianBinaryWriter writer, ArrayPointer arrayPointer)
+        public static void JumpToAddress(this EndianBinaryWriter writer, ArrayPointer arrayPointer, bool canJumpToNull = false)
         {
+            if (!canJumpToNull && arrayPointer.IsNull)
+                throw new Exception($"{nameof(ArrayPointer)} is null!");
+
             writer.BaseStream.Seek(arrayPointer.address, SeekOrigin.Begin);
         }
 
