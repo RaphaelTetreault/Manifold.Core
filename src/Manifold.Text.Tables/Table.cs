@@ -42,42 +42,7 @@ namespace Manifold.Text.Tables
         }
 
 
-        //
-        //public string[] this[int axis]
-        //{
-        //    get { }
-        //    set { TableRowCol }
-        //}
-        //public string this[int row, int col]
-        //{
-        //    get
-        //    {
-        //        int dataRow = ColHeadersCount + row;
-        //        int dataCol = RowHeadersCount + col;
-        //        string value = TableRowCol[dataRow][dataCol];
-        //        return value;
-        //    }
-        //    set
-        //    {
-
-        //    }
-        //}
-
         // METHODS
-
-        // TODO: aggressively inline?
-        private int GetDataRow(int rowIndex)
-        {
-            int dataRowIndex = ColHeadersCount + rowIndex;
-            return dataRowIndex;
-        }
-        private int GetDataCol(int colIndex)
-        {
-            int dataColIndex = RowHeadersCount + colIndex;
-            return dataColIndex;
-        }
-
-
         public string GetNext()
             => GetNext(out _);
         public string GetNext(out bool isAtEndOfAxis)
@@ -93,13 +58,13 @@ namespace Manifold.Text.Tables
             T value = parse.Invoke(strValue);
             return value;
         }
-        public ReadOnlySpan<string> GetRow(int index)
+        public string[] GetRow(int rowIndex)
         {
-            string[] row = TableRowCol[index];
+            string[] row = TableRowCol[rowIndex];
             string[] rowData = row[RowHeadersCount..DataWidth];
             return rowData;
         }
-        public ReadOnlySpan<string> GetRow(string rowHeader)
+        public string[] GetRow(string rowHeader)
         {
             foreach (string[] row in TableRowCol)
             {
@@ -116,6 +81,12 @@ namespace Manifold.Text.Tables
 
             string msg = $"No row with header value {rowHeader}.";
             throw new KeyNotFoundException(msg);
+        }
+        public string[] GetFullRow(int rowIndex)
+        {
+            string[] row = TableRowCol[rowIndex];
+            string[] rowData = row[0..DataWidth];
+            return rowData;
         }
         public string GetNextFromRow()
             => GetNextFromRow(out _);
@@ -142,7 +113,7 @@ namespace Manifold.Text.Tables
             T value = parse.Invoke(strValue);
             return value;
         }
-        public ReadOnlySpan<string> GetCol(int columnIndex)
+        public string[] GetCol(int columnIndex)
         {
             string[] col = new string[DataHeight];
 
@@ -157,7 +128,7 @@ namespace Manifold.Text.Tables
 
             return col;
         }
-        public ReadOnlySpan<string> GetCol(string colHeader)
+        public string[] GetCol(string colHeader)
         {
             for (int col = RowHeadersCount; col < DataWidth; col++)
             {
@@ -167,7 +138,7 @@ namespace Manifold.Text.Tables
                     if (header != colHeader)
                         continue;
 
-                    ReadOnlySpan<string> colValues = GetCol(col);
+                    string[] colValues = GetCol(col);
                     return colValues;
                 }
             }
@@ -175,6 +146,16 @@ namespace Manifold.Text.Tables
             string msg = $"No column with header value {colHeader}.";
             throw new KeyNotFoundException(msg);
         }
+        public string[] GetFullCol(int columnIndex)
+        {
+            string[] col = new string[FullHeight];
+
+            for (int rowIndex = 0; rowIndex < FullHeight; rowIndex++)
+                col[rowIndex] = TableRowCol[rowIndex][columnIndex];
+
+            return col;
+        }
+
         public string GetNextFromCol()
             => GetNextFromCol(out _);
         public string GetNextFromCol(out bool isAtEndOfCol)
@@ -479,10 +460,10 @@ namespace Manifold.Text.Tables
         {
             TableRowCol = ArrayUtility.DefaultArray2D(string.Empty, DefaultSize, DefaultSize);
         }
-        public void InsertRow(int rowIndex, string[] rowValues)
+        public void InsertRow(int rowIndex)
         {
             string[] row = ArrayUtility.DefaultArray(string.Empty, DataWidth);
-            InsertRow(rowIndex, rowValues);
+            InsertRow(rowIndex, row);
         }
         public void InsertRow(int rowIndex, string[] rowValues, params string[] headers)
         {
@@ -572,15 +553,65 @@ namespace Manifold.Text.Tables
 
         public void PivotTable()
         {
-            throw new NotImplementedException();
+            // Flip axes
+            string[][] pivotedTable = new string[InternalHeight][];
+
+            // Take columns from old table, insert into new table
+            for (int colIndex = 0; colIndex < FullWidth; colIndex++)
+            {
+                string[] column = TableRowCol[colIndex];
+                pivotedTable[colIndex] = column;
+            }
+
+            // Swap header counts
+            int tempColHeadersCount = ColHeadersCount;
+            ColHeadersCount = RowHeadersCount;
+            RowHeadersCount = tempColHeadersCount;
+            // Swap data counts
+            int tempDataWidth = DataWidth;
+            DataWidth = DataHeight;
+            DataHeight = tempDataWidth;
+            // Swap active
+            int tempActiveDataCol = ActiveDataCol;
+            ActiveDataCol = ActiveDataRow;
+            ActiveDataRow = tempActiveDataCol;
         }
         public void SwapRows(int rowIndex1, int rowIndex2)
         {
-            throw new NotImplementedException();
+            string[] row1 = TableRowCol[rowIndex1];
+            string[] row2 = TableRowCol[rowIndex2];
+            TableRowCol[rowIndex1] = row2;
+            TableRowCol[rowIndex2] = row1;
         }
         public void SwapColumns(int columnIndex1, int columnIndex2)
         {
-            throw new NotImplementedException();
+            string[] tempCol1 = GetFullCol(columnIndex1);
+            string[] tempCol2 = GetFullCol(columnIndex2);
+            CopyToColRaw(columnIndex1, tempCol2);
+            CopyToColRaw(columnIndex2, tempCol1);
+        }
+        public void MoveRow(int fromRowIndex, int toRowIndex)
+        {
+            // Adjust target index if needed
+            if (toRowIndex > fromRowIndex)
+                toRowIndex -= 1;
+
+            // Copy raw row
+            string[] row = GetFullRow(fromRowIndex);
+            RemoveRow(fromRowIndex);
+            InsertRow(toRowIndex);
+            CopyToRowRaw(toRowIndex, row);
+        }
+        public void MoveCol(int fromColIndex, int toColIndex)
+        {
+            // Adjust target index if needed
+            if (toColIndex > fromColIndex)
+                toColIndex -= 1;
+
+            string[] col = GetFullCol(fromColIndex);
+            RemoveCol(fromColIndex);
+            InsertCol(toColIndex);
+            CopyToColRaw(toColIndex, col);
         }
 
 
