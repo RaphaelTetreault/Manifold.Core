@@ -1,10 +1,12 @@
-namespace Manifold.IO
+﻿namespace Manifold.IO
 {
     /// <summary>
-    /// 
+    ///     
     /// </summary>
-    [System.Serializable]
-    public struct ArrayPointer :
+    /// <remarks>
+    ///     Type is meant to replace older ArrayPointer.
+    /// </remarks>
+    public struct ArrayPointer32 :
         IBinarySerializable,
         IPointer
     {
@@ -14,10 +16,14 @@ namespace Manifold.IO
 
 
         // CONSTRUCTORS
-        public ArrayPointer(int length = 0, int address = 0)
+        public ArrayPointer32()
         {
-            this.length = length;
+
+        }
+        public ArrayPointer32(int address, int length)
+        {
             this.address = address;
+            this.length = length;
         }
 
 
@@ -41,19 +47,19 @@ namespace Manifold.IO
             writer.Write(length);
             writer.Write(address);
         }
-        public override string ToString()
+        public override readonly string ToString()
         {
-            return $"Length: {length}, Address: {PrintAddress}";
+            return $"Address: {PrintAddress}, Length: {length}, ";
         }
 
 
         // OPERATORS
-        public static bool operator ==(ArrayPointer lhs, ArrayPointer rhs)
+        public static bool operator ==(ArrayPointer32 lhs, ArrayPointer32 rhs)
         {
             return lhs.address == rhs.address && lhs.length == rhs.length;
         }
 
-        public static bool operator !=(ArrayPointer lhs, ArrayPointer rhs)
+        public static bool operator !=(ArrayPointer32 lhs, ArrayPointer32 rhs)
         {
             return lhs.address != rhs.address || lhs.length != rhs.length;
         }
@@ -63,10 +69,10 @@ namespace Manifold.IO
             if (obj == null)
                 return false;
 
-            if (obj.GetType() != typeof(ArrayPointer))
+            if (obj.GetType() != typeof(ArrayPointer32))
                 return false;
 
-            bool isEqual = (ArrayPointer)obj == this;
+            bool isEqual = (ArrayPointer32)obj == this;
             return isEqual;
         }
 
