@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 
 namespace Manifold.Text.Tables
@@ -188,6 +189,33 @@ namespace Manifold.Text.Tables
             return tableAreas.ToArray();
         }
 
+        public void ToFile(string path, TableEncoding tableEncoding)
+        {
+            // move filepath from gfz-cli to manifold?
+            if (Path.GetExtension(path) != tableEncoding.DefaultFileExtension)
+            {
+                throw new Exception();
+            }
+
+            using var writer = new StreamWriter(File.OpenWrite(path));
+            
+            foreach (var table in tables)
+            {
+                writer.Write(table.Name);
+                writer.Write(tableEncoding.RowSeparator);
+                for (int row = 0; row < table.FullHeight; row++)
+                {
+                    for (int col = 0; col < table.FullWidth; col++)
+                    {
+                        string cell = table.GetCell(row, col);
+                        writer.Write(cell);
+                        writer.Write(tableEncoding.ColSeparator);
+                    }
+                    writer.Write(tableEncoding.RowSeparator);
+                }
+                writer.Write(tableEncoding.RowSeparator);
+            }
+        }
 
         // Interfaces
         public void Add(Table item) => tables.Add(item);
