@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Diagnostics;
 
 namespace Manifold.IO
 {
@@ -14,7 +13,7 @@ namespace Manifold.IO
         }
 
 
-        public static void IsTrue(bool value, string message = null)
+        public static void IsTrue(bool value, string message = "")
         {
             if (value)
                 return;
@@ -29,7 +28,7 @@ namespace Manifold.IO
             }
         }
 
-        public static void IsFalse(bool value, string message = null)
+        public static void IsFalse(bool value, string message = "")
             => IsTrue(!value, message);
 
         public static void ContainsNoNulls<T>(T ienumerable)
@@ -46,13 +45,14 @@ namespace Manifold.IO
         {
             bool referenceIsNull = reference == null;
             // There is an issue if one of the two are set, but when both are the same, no issue
-            bool invalidState = referenceIsNull ^ pointer.IsNull;
-
-            var msg = referenceIsNull
-                ? $"Reference is null but pointer is not! Ptr(0x{pointer.Address:x8})"
-                : $"Reference exists but pointer is null!";
-
-            IsFalse(invalidState, msg);
+            bool isInvalidState = referenceIsNull ^ pointer.IsNull;
+            if (isInvalidState)
+            {
+                var msg = referenceIsNull
+                    ? $"Reference is null but pointer is not! Ptr(0x{pointer.Address:x8})"
+                    : $"Reference exists but pointer is null!";
+                throw new AssertException(msg);
+            }
         }
 
 

@@ -1,5 +1,3 @@
-using System.IO;
-
 namespace Manifold.IO
 {
     public interface IPlainTextSerializable
