@@ -15,7 +15,6 @@ namespace Manifold.Text.Tables
         protected delegate bool CompareStrings(string a, string b);
 
         protected List<Table> tables { get; } = new();
-        public Table CurrentTable { get; private set; } = new();
 
         // ICollection, IList
         public int Count => tables.Count;
@@ -39,9 +38,9 @@ namespace Manifold.Text.Tables
         }
         public Table? GetTable(string name, bool isCaseInsensitive = false)
         {
-            CompareStrings compare = GetCompareStringsFunction(isCaseInsensitive);
+            CompareStrings compareEquals = GetCompareStringsFunction(isCaseInsensitive);
             foreach (Table table in tables)
-                if (compare(table.Name, name))
+                if (compareEquals(table.Name, name))
                     return table;
 
             return null;
@@ -57,16 +56,6 @@ namespace Manifold.Text.Tables
             }
 
             return table;
-        }
-        public void SetCurrentTable(int index)
-        {
-            Table table = tables[index];
-            CurrentTable = table;
-        }
-        public void SetCurrentTable(string name, bool isCaseInsensitive = false)
-        {
-            Table table = GetTableOrError(name, isCaseInsensitive);
-            CurrentTable = table;
         }
 
         protected CompareStrings GetCompareStringsFunction(bool isCaseInsensitive)
@@ -217,6 +206,11 @@ namespace Manifold.Text.Tables
                 }
                 writer.Write(tableEncoding.RowSeparator);
             }
+        }
+        public void Add(params Table[] tables)
+        {
+            foreach (var table in tables)
+                Add(table);
         }
 
         // Interfaces
