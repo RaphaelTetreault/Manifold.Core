@@ -126,7 +126,7 @@ namespace Manifold.IO
             }
         }
 
-        public string ReadValue()
+        private string ReadValueIndented()
         {
             string line = ReadLineIndented();
             string[] segments = line.Split(':');
@@ -134,15 +134,38 @@ namespace Manifold.IO
             valueText = valueText.Trim();
             return valueText;
         }
+
+        public T ReadValue<T>(Func<string, T> parse)
+        {
+            string valueText = ReadValueIndented();
+            T value = parse.Invoke(valueText);
+            return value;
+        }
+        public string ReadValue() => ReadValueIndented();
+        public bool ReadBool() => ReadValue(bool.Parse);
+        public byte ReadByte() => ReadValue(byte.Parse);
+        public byte ReadUInt8() => ReadByte();
+        public ushort ReadUInt16() => ReadValue(ushort.Parse);
+        public uint ReadUInt32() => ReadValue(uint.Parse);
+        public ulong ReadUInt64() => ReadValue(ulong.Parse);
+        public sbyte ReadInt8() => ReadValue(sbyte.Parse);
+        public short ReadInt16() => ReadValue(short.Parse);
+        public int ReadInt32() => ReadValue(int.Parse);
+        public long ReadInt64() => ReadValue(long.Parse);
+        public float ReadSingle() => ReadValue(float.Parse);
+        public double ReadDouble() => ReadValue(double.Parse);
+
         public void ReadValue<T>(ref T value, Func<string, T> parse)
         {
-            string valueText = ReadValue();
+            string valueText = ReadValueIndented();
             value = parse.Invoke(valueText);
         }
         public void ReadValue(ref string value)
         {
-            value = ReadValue();
+            value = ReadValueIndented();
         }
+        public void ReadValue(ref bool value)
+            => ReadValue(ref value, bool.Parse);
         public void ReadValue(ref byte value)
             => ReadValue(ref value, byte.Parse);
         public void ReadValue(ref ushort value)
