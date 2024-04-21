@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reflection.PortableExecutable;
 
 namespace Manifold.Text.Tables
@@ -607,7 +608,7 @@ namespace Manifold.Text.Tables
         }
 
 
-        public static Table FromArea(string[][] cells, TableArea area, string name = "")
+        public static Table FromArea(string[][] cells, TableArea area)
         {
             Table table = new Table();
             
@@ -616,14 +617,34 @@ namespace Manifold.Text.Tables
             // Copy subset of rows into table
             for (int rowIndex = area.BeginRow; rowIndex < area.EndRow; rowIndex++)
             {
-                string[] row = cells[rowIndex][area.BeginX..area.EndX];
+                string[] row = cells[rowIndex][area.BeginColumn..area.EndColumn];
                 table.SetFullRow(rowIndex, row);
             }
 
             // Copy over some metadata
             table.RowHeadersCount = area.rowHeaderCount;
             table.ColumnHeadersCount = area.colHeaderCount;
-            table.Name = name;
+            table.Name = area.name;
+
+            return table;
+        }
+        public static Table FromCells(string[][] cells)
+        {
+            // Find dimensions of table
+            int rowCount = cells.Length;
+            int colCount = 0;
+            for (int row = 0; row < cells.GetLength(0); row++)
+               colCount = cells[row].Length > colCount ? cells[row].Length : colCount;
+
+            // Set dimensions
+            Table table = new Table();
+            table.DataWidth = rowCount;
+            table.DataHeight = colCount;
+
+            // Create underlying cells in table, set values
+            table.TableRowsAndColumns = ArrayUtility.DefaultArray2D(string.Empty, rowCount, colCount);
+            for (int i = 0; i < rowCount; i++)
+                cells.CopyTo(table.TableRowsAndColumns, 0);
 
             return table;
         }

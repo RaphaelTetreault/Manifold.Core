@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 namespace Manifold.Text.Tables
 {
@@ -86,17 +87,107 @@ namespace Manifold.Text.Tables
                 : CompareFuncSensitive;
         }
 
-        // TODO: figure out a good heuristic to deserializing tables/subtables
-        // Enum?
-        //      Single table
-        //      Heuristic: trim left, right based on max bounds
-        //      Above, but any gaps are considered split between tables
-        // Position data array?
-        //      offsets xy, wh, header wh, name y/n
-        public static TableCollection FromFile()
+
+        // Build tables
+        public static TableCollection FromFile(string filePath, TableEncoding tableEncoding, TableInferenceMode inferenceMode = TableInferenceMode.None)
         {
-            throw new NotImplementedException();
+            string text = File.ReadAllText(filePath);
+            TableCollection tables = FromText(text, tableEncoding, inferenceMode);
+            return tables;
         }
+        public static TableCollection FromFile(string filePath, TableEncoding tableEncoding, TableArea[] tableAreas)
+        {
+            string text = File.ReadAllText(filePath);
+            TableCollection tables = FromText(text, tableEncoding, tableAreas);
+            return tables;
+        }
+        public static TableCollection FromText(string text, TableEncoding tableEncoding, TableInferenceMode inferenceMode = TableInferenceMode.None)
+        {
+            string[] lines = tableEncoding.GetLinesFromText(text);
+            string[][] cells = tableEncoding.GetCellsFromLines(lines);
+
+            return inferenceMode switch
+            {
+                TableInferenceMode.None => FromCells(cells),
+                _ => FromInferedTableAreas(lines, cells, inferenceMode),
+            };
+        }
+        public static TableCollection FromText(string text, TableEncoding tableEncoding, TableArea[] tableAreas)
+        {
+            string[][] cells = tableEncoding.GetCellsFromText(text);
+            TableCollection tables = FromCells(cells, tableAreas);
+            return tables;
+        }
+        public static TableCollection FromCells(string[][] cells, TableArea[] tableAreas)
+        {
+            TableCollection tables = new TableCollection();
+            foreach (var tableArea in tableAreas)
+            {
+                Table table = Table.FromArea(cells, tableArea);
+                tables.Add(table);
+            }
+
+            return tables;
+        }
+        private static TableCollection FromCells(string[][] cells)
+        {
+            TableCollection tables = new TableCollection();
+            Table table = Table.FromCells(cells);
+            tables.Add(table);
+            return tables;
+        }
+        private static TableCollection FromInferedTableAreas(string[] lines, string[][] cells, TableInferenceMode inferenceMode)
+        {
+            TableArea[] tableAreas = InferTableAreas(lines, cells, inferenceMode);
+            TableCollection tables = FromCells(cells, tableAreas);
+            return tables;
+        }
+        private static TableArea[] InferTableAreas(string[] lines, string[][] cells, TableInferenceMode tableInference)
+        {
+            List<TableArea> tableAreas = new();
+            TableArea tableArea = new();
+            bool isReadingTable = false;
+
+            // Capture vertical areas of tables
+            for (int rowIndex = 0; rowIndex < lines.Length; rowIndex++)
+            {
+                string line = lines[rowIndex];
+                bool hasValue = !string.IsNullOrWhiteSpace(line);
+                bool captureStart = hasValue && !isReadingTable;
+                bool captureEnd = !hasValue && isReadingTable;
+                if (captureStart)
+                {
+                    tableArea.posY = checked((ushort)rowIndex);
+                    isReadingTable = true;
+                }
+                else if (captureEnd)
+                {
+                    tableArea.height = checked((uint)rowIndex - tableArea.posY);
+                    isReadingTable = false;
+                    tableAreas.Add(tableArea);
+                    tableArea = new TableArea();
+                }
+            }
+
+            // Capture horizontal areas of tables
+            foreach (TableArea area in tableAreas)
+            {
+                // Capture name of table...
+                // inc. y if necessary
+
+                // tODO: solve for width of table
+                for (int rowIndex = area.BeginRow; rowIndex < area.EndRow; rowIndex++)
+                {
+                    string[] linesCells = cells[rowIndex];
+                    // do stuff
+                }
+            }
+
+            // Capture headers?
+
+            return tableAreas.ToArray();
+        }
+
 
         // Interfaces
         public void Add(Table item) => tables.Add(item);
