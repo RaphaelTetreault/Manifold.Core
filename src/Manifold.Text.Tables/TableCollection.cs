@@ -189,6 +189,7 @@ namespace Manifold.Text.Tables
             return tableAreas.ToArray();
         }
 
+        // TODO: to stream, to file, to etc...
         public void ToFile(string path, TableEncoding tableEncoding)
         {
             // move filepath from gfz-cli to manifold?
@@ -197,15 +198,16 @@ namespace Manifold.Text.Tables
                 throw new Exception();
             }
 
-            using var writer = new StreamWriter(File.OpenWrite(path));
+            using var writer = new StreamWriter(File.Create(path));
             
             foreach (var table in tables)
             {
                 writer.Write(table.Name);
                 writer.Write(tableEncoding.RowSeparator);
-                for (int row = 0; row < table.Height; row++)
+                // TODO: don't use internal width, use recorded max bounds
+                for (int row = 0; row < table.InternalHeight; row++)
                 {
-                    for (int col = 0; col < table.Width; col++)
+                    for (int col = 0; col < table.InternalWidth; col++)
                     {
                         string cell = table.GetCell(row, col);
                         writer.Write(cell);
