@@ -203,9 +203,9 @@ namespace Manifold.Text.Tables
             {
                 writer.Write(table.Name);
                 writer.Write(tableEncoding.RowSeparator);
-                for (int row = 0; row < table.FullHeight; row++)
+                for (int row = 0; row < table.Height; row++)
                 {
-                    for (int col = 0; col < table.FullWidth; col++)
+                    for (int col = 0; col < table.Width; col++)
                     {
                         string cell = table.GetCell(row, col);
                         writer.Write(cell);
