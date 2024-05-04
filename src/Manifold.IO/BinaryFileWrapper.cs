@@ -10,8 +10,8 @@ namespace Manifold.IO
         public abstract Endianness Endianness { get; }
         public abstract string FileExtension { get; }
         public abstract string FileName { get; set; }
-        public Type Type => typeof(TBinarySerializable);
         public abstract string Version { get; }
+        public Type Type => typeof(TBinarySerializable);
 
         public TBinarySerializable Value { get; set; } = new TBinarySerializable();
 
