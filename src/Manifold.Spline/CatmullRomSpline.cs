@@ -1,12 +1,12 @@
-using Unity.Mathematics;
+using System.Numerics;
 
 namespace Manifold
 {
     public class CatmullRomSpline
     {
-        public const double UniformAlpha = 0f;
-        public const double CentripetalAlpha = 0.5f;
-        public const double ChordalAlpha = 1f;
+        public const float UniformAlpha = 0f;
+        public const float CentripetalAlpha = 0.5f;
+        public const float ChordalAlpha = 1f;
 
         /// <summary>
         /// Get the time value appropriate for a Catmull-Rom spline
@@ -15,20 +15,20 @@ namespace Manifold
         /// <param name="to"></param>
         /// <param name="alpha"></param>
         /// <returns></returns>
-        public static double GetTime(double3 from, double3 to, double alpha)
+        public static float GetTime(Vector3 from, Vector3 to, float alpha)
         {
             // Get the difference between the two points
-            double3 delta = to - from;
+            Vector3 delta = to - from;
 
             // delta to the power of two, each componenet summed
-            double squaredSum =
-                delta.x * delta.x +
-                delta.y * delta.y +
-                delta.z * delta.z;
+            float squaredSum =
+                delta.X * delta.X +
+                delta.Y * delta.Y +
+                delta.Z * delta.Z;
 
             // 
-            double power = alpha * 0.5f;
-            double time = math.pow(squaredSum, power);
+            float power = alpha * 0.5f;
+            float time = (float)Math.Pow(squaredSum, power);
 
             return time;
         }
@@ -42,7 +42,7 @@ namespace Manifold
         /// <param name="t1"></param>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static double3 BarryGoldmanPyramidalFormulationStep(double3 p0, double3 p1, double t0, double t1, double t)
+        public static Vector3 BarryGoldmanPyramidalFormulationStep(Vector3 p0, Vector3 p1, float t0, float t1, float t)
         {
             // Single iteration of Barry and Goldman's pyramidal formulation
             // https://en.wikipedia.org/wiki/File:Cubic_Catmull-Rom_formulation.png
@@ -67,20 +67,20 @@ namespace Manifold
         /// <param name="t3"></param>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static double3 BarryGoldmanPyramidalFormulation(double3 p0, double3 p1, double3 p2, double3 p3, double t0, double t1, double t2, double t3, double t)
+        public static Vector3 BarryGoldmanPyramidalFormulation(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t0, float t1, float t2, float t3, float t)
         {
             // Barry and Goldman's pyramidal formulation
             // https://en.wikipedia.org/wiki/File:Cubic_Catmull-Rom_formulation.png
 
             // Formulation between 4 points provided
-            double3 a1 = BarryGoldmanPyramidalFormulationStep(p0, p1, t0, t1, t);
-            double3 a2 = BarryGoldmanPyramidalFormulationStep(p1, p2, t1, t2, t);
-            double3 a3 = BarryGoldmanPyramidalFormulationStep(p2, p3, t2, t3, t);
+            Vector3 a1 = BarryGoldmanPyramidalFormulationStep(p0, p1, t0, t1, t);
+            Vector3 a2 = BarryGoldmanPyramidalFormulationStep(p1, p2, t1, t2, t);
+            Vector3 a3 = BarryGoldmanPyramidalFormulationStep(p2, p3, t2, t3, t);
             // Formulation between above 3 intervals
-            double3 b1 = BarryGoldmanPyramidalFormulationStep(a1, a2, t0, t2, t);
-            double3 b2 = BarryGoldmanPyramidalFormulationStep(a2, a3, t1, t3, t);
+            Vector3 b1 = BarryGoldmanPyramidalFormulationStep(a1, a2, t0, t2, t);
+            Vector3 b2 = BarryGoldmanPyramidalFormulationStep(a2, a3, t1, t3, t);
             // Formulation between above 2 intervals
-            double3 c = BarryGoldmanPyramidalFormulationStep(b1, b2, t1, t2, t);
+            Vector3 c = BarryGoldmanPyramidalFormulationStep(b1, b2, t1, t2, t);
 
             return c;
         }
@@ -95,14 +95,14 @@ namespace Manifold
         /// <param name="alpha"></param>
         /// <param name="t"></param>
         /// <returns></returns>
-        public static double3 Evaluate(double3 p0, double3 p1, double3 p2, double3 p3, double alpha, double t)
+        public static Vector3 Evaluate(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float alpha, float t)
         {
             // Get times for these points (unpacking tuple)
-            (double t0, double t1, double t2, double t3) = GetPointTime(p0, p1, p2, p3, alpha);
+            (float t0, float t1, float t2, float t3) = GetPointTime(p0, p1, p2, p3, alpha);
 
-            double catmullRomTime = math.lerp(t1, t2, t);
+            float catmullRomTime = float.Lerp(t1, t2, t);
 
-            double3 point = BarryGoldmanPyramidalFormulation(p0, p1, p2, p3, t0, t1, t2, t3, catmullRomTime);
+            Vector3 point = BarryGoldmanPyramidalFormulation(p0, p1, p2, p3, t0, t1, t2, t3, catmullRomTime);
             return point;
         }
 
@@ -117,20 +117,20 @@ namespace Manifold
         /// <param name="alpha"></param>
         /// <param name="nIterations"></param>
         /// <returns></returns>
-        public static double3[] EvaluateMany(double3 p0, double3 p1, double3 p2, double3 p3, double alpha, int nIterations)
+        public static Vector3[] EvaluateMany(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float alpha, int nIterations)
         {
-            double3[] points = new double3[nIterations];
+            Vector3[] points = new Vector3[nIterations];
 
             // Get times for these points (unpacking tuple)
-            (double t0, double t1, double t2, double t3) = GetPointTime(p0, p1, p2, p3, alpha);
+            (float t0, float t1, float t2, float t3) = GetPointTime(p0, p1, p2, p3, alpha);
 
             // 
             var timeMax = nIterations - 1;
             for (int i = 0; i < nIterations; i++)
             {
                 // Iteration Time
-                double it = (double)i / timeMax;
-                double catmullRomTime = math.lerp(t1, t2, it);
+                float it = (float)i / timeMax;
+                float catmullRomTime = float.Lerp(t1, t2, it);
                 points[i] = BarryGoldmanPyramidalFormulation(p0, p1, p2, p3, t0, t1, t2, t3, catmullRomTime);
             }
 
@@ -138,30 +138,30 @@ namespace Manifold
         }
 
 
-        public static (double t0, double t1, double t2, double t3) GetPointTime(double3 p0, double3 p1, double3 p2, double3 p3, double alpha)
+        public static (float t0, float t1, float t2, float t3) GetPointTime(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float alpha)
         {
             // Get the times for the 4 points priovided
-            double t0 = 0f;
-            double t1 = GetTime(p0, p1, alpha);
-            double t2 = GetTime(p1, p2, alpha) + t1;
-            double t3 = GetTime(p2, p3, alpha) + t2;
+            float t0 = 0f;
+            float t1 = GetTime(p0, p1, alpha);
+            float t2 = GetTime(p1, p2, alpha) + t1;
+            float t3 = GetTime(p2, p3, alpha) + t2;
             return (t0, t1, t2, t3);
         }
 
 
 
 
-        public static (double3 position, double3 direction) HackGetPositionDirection(double3 p0, double3 p1, double3 p2, double3 p3, double alpha, double t)
+        public static (Vector3 position, Vector3 direction) HackGetPositionDirection(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float alpha, float t)
         {
             // Get times for these points (unpacking tuple)
-            (double t0, double t1, double t2, double t3) = GetPointTime(p0, p1, p2, p3, alpha);
-            double catmullRomTime = math.lerp(t1, t2, t);
+            (float t0, float t1, float t2, float t3) = GetPointTime(p0, p1, p2, p3, alpha);
+            float catmullRomTime = float.Lerp(t1, t2, t);
             // Sample point at this time
-            double3 point = BarryGoldmanPyramidalFormulation(p0, p1, p2, p3, t0, t1, t2, t3, catmullRomTime);
+            Vector3 point = BarryGoldmanPyramidalFormulation(p0, p1, p2, p3, t0, t1, t2, t3, catmullRomTime);
 
             // This is the hack piece: sample curve very slightly ahead, get delta
-            double3 pointNext = BarryGoldmanPyramidalFormulation(p0, p1, p2, p3, t0, t1, t2, t3, catmullRomTime + 0.00001);
-            double3 direction = pointNext - point;
+            Vector3 pointNext = BarryGoldmanPyramidalFormulation(p0, p1, p2, p3, t0, t1, t2, t3, catmullRomTime + 0.00001f);
+            Vector3 direction = pointNext - point;
 
             return (point, direction);
         }

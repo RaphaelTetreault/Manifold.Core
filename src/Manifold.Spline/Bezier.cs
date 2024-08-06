@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Unity.Mathematics;
+﻿using System.Numerics;
 
 namespace Manifold.Spline
 {
@@ -20,9 +15,9 @@ namespace Manifold.Spline
         /// <param name="p3">End position</param>
         /// <param name="t">Time 0 through 1</param>
         /// <returns></returns>
-        public static float3 GetPoint(float3 p0, float3 p1, float3 p2, float3 p3, float t)
+        public static Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
         {
-            t = math.clamp(t, 0, 1);
+            t = Math.Clamp(t, 0, 1);
             float oneMinusT = 1f - t;
             return
                 oneMinusT * oneMinusT * oneMinusT * p0 +
@@ -31,9 +26,9 @@ namespace Manifold.Spline
                 t * t * t * p3;
         }
 
-        public static float3 GetFirstDerivative(float3 p0, float3 p1, float3 p2, float3 p3, float t)
+        public static Vector3 GetFirstDerivative(Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3, float t)
         {
-            t = math.clamp(t, 0, 1);
+            t = Math.Clamp(t, 0, 1);
             float oneMinusT = 1f - t;
             return
                 3f * oneMinusT * oneMinusT * (p1 - p0) +
@@ -44,12 +39,12 @@ namespace Manifold.Spline
 
         // Quadratic Bezier, ^2
 
-        public static float3 GetPoint(float3 p0, float3 p1, float3 p2, float t)
+        public static Vector3 GetPoint(Vector3 p0, Vector3 p1, Vector3 p2, float t)
         {
-            t = math.clamp(t, 0f, 1f);
+            t = Math.Clamp(t, 0f, 1f);
             float invT = 1f - t;
 
-            float3 quadraticBezierPoint =
+            Vector3 quadraticBezierPoint =
                 invT * invT * p0 +
                 2f * invT * t * p1 +
                 t * t * p2;
@@ -57,9 +52,9 @@ namespace Manifold.Spline
             return quadraticBezierPoint;
         }
 
-        public static float3 GetFirstDerivative(float3 p0, float3 p1, float3 p2, float t)
+        public static Vector3 GetFirstDerivative(Vector3 p0, Vector3 p1, Vector3 p2, float t)
         {
-            float3 firstDerivitive =
+            Vector3 firstDerivitive =
                 2f * (1f - t) * (p1 - p0) +
                 2f * t * (p2 - p1);
 
