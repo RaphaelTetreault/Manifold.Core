@@ -10,7 +10,7 @@ namespace Manifold.IO
         /// Positions underlying stream at end of stream.
         /// </summary>
         /// <param name="writer"></param>
-        public static void SeekEnd(this EndianBinaryWriter writer)
+        public static void JumpToEnd(this EndianBinaryWriter writer)
         {
             long endOfStream = writer.BaseStream.Length;
             writer.BaseStream.Seek(endOfStream, SeekOrigin.Begin);
@@ -20,7 +20,7 @@ namespace Manifold.IO
         /// Positions underlying stream at beginning of stream.
         /// </summary>
         /// <param name="writer"></param>
-        public static void SeekStart(this EndianBinaryWriter writer)
+        public static void JumpToZero(this EndianBinaryWriter writer)
         {
             writer.BaseStream.Seek(0, SeekOrigin.Begin);
         }

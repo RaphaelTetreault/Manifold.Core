@@ -29,7 +29,7 @@ namespace Manifold.IO
         /// Sets the stream's position to 0.
         /// </summary>
         /// <param name="reader"></param>
-        public static void SeekBegin(this EndianBinaryReader reader)
+        public static void JumpToZero(this EndianBinaryReader reader)
         {
             reader.BaseStream.Seek(0, SeekOrigin.Begin);
         }

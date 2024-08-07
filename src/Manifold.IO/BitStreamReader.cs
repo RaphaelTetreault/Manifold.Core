@@ -18,7 +18,7 @@ namespace Manifold.IO
             long position = endianBinaryReader.BaseStream.Position;
             this.position = (int)position * 8;
 
-            endianBinaryReader.SeekBegin();
+            endianBinaryReader.JumpToZero();
             var bytes = endianBinaryReader.ReadBytes((int)endianBinaryReader.BaseStream.Length);
             bitstream = new BitArray(bytes);
             endianBinaryReader.JumpToAddress(position);
