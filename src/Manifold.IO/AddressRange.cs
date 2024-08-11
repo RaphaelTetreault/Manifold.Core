@@ -57,6 +57,18 @@ namespace Manifold.IO
             return $"{prefix}{endAddress.ToString(format)}";
         }
 
+        /// <summary>
+        ///     Retrieves bytes from address range
+        /// </summary>
+        /// <param name="reader"></param>
+        /// <returns></returns>
+        public byte[] GetBytes(EndianBinaryReader reader)
+        {
+            reader.JumpToAddress(startAddress);
+            byte[] bytes = reader.ReadBytes(Size);
+            return bytes;
+        }
+
         public override string ToString()
         {
             return $"{nameof(AddressRange)}(Start: {startAddress:x8}, End: {endAddress:x8}, Size: {Size} 0x{Size:x})";
