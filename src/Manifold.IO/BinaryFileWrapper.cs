@@ -33,8 +33,8 @@ namespace Manifold.IO
         }
 
 
-        public abstract Endianness Endianness { get; }
-        public abstract string FileExtension { get; }
+        public abstract Endianness Endianness { get; set; }
+        public abstract string FileExtension { get; set; }
         public abstract string FileName { get; set; }
         public Type Type => typeof(TBinarySerializable);
 
@@ -54,5 +54,18 @@ namespace Manifold.IO
         {
             return fileWrapper.Value;
         }
+
+        public void WriteFile(string outputPath, Endianness endianness)
+        {
+            if (Value == null)
+            {
+                string msg = $"{nameof(Value)} is null.";
+                throw new Exception(msg);
+            }
+
+            using var writer = new EndianBinaryWriter(File.Create(outputPath), endianness);
+            Value.Serialize(writer);
+        }
+        public void WriteFile(string outputPath) => WriteFile(outputPath, Endianness);
     }
 }
