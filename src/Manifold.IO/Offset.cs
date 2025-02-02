@@ -24,10 +24,10 @@ namespace Manifold.IO
 
 
         // PROPERTIES
-        int IOffset.AddressOffset => addressOffset;
-        public bool IsNotNull => addressOffset != 0;
-        public bool IsNull => addressOffset == 0;
-        public string PrintAddressOffset => $"{addressOffset:x8}";
+        readonly int IOffset.AddressOffset => addressOffset;
+        public readonly bool IsNotNull => addressOffset != 0;
+        public readonly bool IsNull => addressOffset == 0;
+        public readonly string PrintAddressOffset => $"{addressOffset:x8}";
 
 
         // OPERATORS
@@ -71,30 +71,43 @@ namespace Manifold.IO
             reader.Read(ref addressOffset);
         }
 
-        public void Serialize(EndianBinaryWriter writer)
+        public readonly void Serialize(EndianBinaryWriter writer)
         {
             writer.Write(addressOffset);
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return PrintAddressOffset;
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
+            if (obj is null)
+                return false;
+
             return Equals((Offset)obj);
         }
 
-        public bool Equals(Offset obj)
+        public readonly bool Equals(Offset obj)
         {
             return obj.addressOffset == this.addressOffset;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return base.GetHashCode();
         }
 
+
+        public static bool operator ==(Offset left, Offset right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Offset left, Offset right)
+        {
+            return !(left == right);
+        }
     }
 }

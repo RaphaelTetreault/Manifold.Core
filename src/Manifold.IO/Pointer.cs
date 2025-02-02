@@ -25,10 +25,10 @@ namespace Manifold.IO
         }
 
         // PROPERTIES
-        int IPointer.Address => address;
-        public string PrintAddress => $"{address:x8}";
-        public bool IsNotNull => address != 0;
-        public bool IsNull => address == 0;
+        readonly int IPointer.Address => address;
+        public readonly string PrintAddress => $"{address:x8}";
+        public readonly bool IsNotNull => address != 0;
+        public readonly bool IsNull => address == 0;
 
 
 
@@ -59,30 +59,43 @@ namespace Manifold.IO
             reader.Read(ref address);
         }
 
-        public void Serialize(EndianBinaryWriter writer)
+        public readonly void Serialize(EndianBinaryWriter writer)
         {
             writer.Write(address);
         }
 
-        public override string ToString()
+        public override readonly string ToString()
         {
             return $"Pointer({PrintAddress})";
         }
 
-        public override bool Equals(object obj)
+        public override readonly bool Equals(object? obj)
         {
+            if (obj is null)
+                return false;
+
             return Equals((Pointer)obj);
         }
 
-        public bool Equals(Pointer obj)
+        public readonly bool Equals(Pointer obj)
         {
             return obj.address == address;
         }
 
-        public override int GetHashCode()
+        public override readonly int GetHashCode()
         {
             return base.GetHashCode();
         }
 
+
+        public static bool operator ==(Pointer left, Pointer right)
+        {
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Pointer left, Pointer right)
+        {
+            return !(left == right);
+        }
     }
 }
