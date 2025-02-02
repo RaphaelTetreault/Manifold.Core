@@ -14,32 +14,32 @@ namespace Manifold.Text.Tables
     {
         protected delegate bool CompareStrings(string a, string b);
 
-        protected List<Table> tables { get; } = new();
+        protected List<Table> Tables { get; } = [];
 
         // ICollection, IList
-        public int Count => tables.Count;
+        public int Count => Tables.Count;
         public bool IsReadOnly => true; // get only?
-        public Table this[int index] { get => tables[index]; set => tables[index] = value; }
+        public Table this[int index] { get => Tables[index]; set => Tables[index] = value; }
 
 
         public Table GetTable(int index)
         {
-            bool isInvalidRange = index >= tables.Count;
+            bool isInvalidRange = index >= Tables.Count;
             if (isInvalidRange)
             {
                 string msg =
-                    $"Collection contains {tables.Count} tables. " +
+                    $"Collection contains {Tables.Count} tables. " +
                     $"Index {index} is out or range.";
                 throw new IndexOutOfRangeException(msg);
             }
 
-            Table table = tables[index];
+            Table table = Tables[index];
             return table;
         }
         public Table? GetTable(string name, bool isCaseInsensitive = false)
         {
             CompareStrings compareEquals = GetCompareStringsFunction(isCaseInsensitive);
-            foreach (Table table in tables)
+            foreach (Table table in Tables)
                 if (compareEquals(table.Name, name))
                     return table;
 
@@ -68,7 +68,7 @@ namespace Manifold.Text.Tables
             // Compare without case sensitivity
             bool CompareFuncInsensitive(string a, string b)
             {
-                return a.ToLower() == b.ToLower();
+                return a.Equals(b, StringComparison.OrdinalIgnoreCase);
             };
 
             // Select
@@ -110,7 +110,7 @@ namespace Manifold.Text.Tables
         }
         public static TableCollection FromCells(string[][] cells, TableArea[] tableAreas)
         {
-            TableCollection tables = new TableCollection();
+            TableCollection tables = [];
             foreach (var tableArea in tableAreas)
             {
                 Table table = Table.FromArea(cells, tableArea);
@@ -121,7 +121,7 @@ namespace Manifold.Text.Tables
         }
         private static TableCollection FromCells(string[][] cells)
         {
-            TableCollection tables = new TableCollection();
+            TableCollection tables = [];
             Table table = Table.FromCells(cells);
             tables.Add(table);
             return tables;
@@ -134,7 +134,7 @@ namespace Manifold.Text.Tables
         }
         private static TableArea[] InferTableAreas(string[] lines, string[][] cells, TableInferenceMode tableInference)
         {
-            List<TableArea> tableAreas = new();
+            List<TableArea> tableAreas = [];
             TableArea tableArea = new();
             bool isReadingTable = false;
 
@@ -175,7 +175,7 @@ namespace Manifold.Text.Tables
 
             // Capture headers?
 
-            return tableAreas.ToArray();
+            return [.. tableAreas];
         }
 
         // TODO: to stream, to file, to etc...
@@ -189,7 +189,7 @@ namespace Manifold.Text.Tables
 
             using var writer = new StreamWriter(File.Create(path));
             
-            foreach (var table in tables)
+            foreach (var table in Tables)
             {
                 writer.Write(table.Name);
                 writer.Write(tableEncoding.RowSeparator);
@@ -214,16 +214,16 @@ namespace Manifold.Text.Tables
         }
 
         // Interfaces
-        public void Add(Table item) => tables.Add(item);
-        public void Clear() => tables.Clear();
-        public bool Contains(Table item) => tables.Contains(item);
-        public void CopyTo(Table[] array, int arrayIndex) => tables.CopyTo(array, arrayIndex);
-        public int IndexOf(Table item) => tables.IndexOf(item);
-        public void Insert(int index, Table item) => tables.Insert(index, item);
-        public void RemoveAt(int index) => tables.RemoveAt(index);
-        public bool Remove(Table item) => tables.Remove(item);
-        public IEnumerator<Table> GetEnumerator() => tables.GetEnumerator();
-        IEnumerator IEnumerable.GetEnumerator() => tables.GetEnumerator();
+        public void Add(Table item) => Tables.Add(item);
+        public void Clear() => Tables.Clear();
+        public bool Contains(Table item) => Tables.Contains(item);
+        public void CopyTo(Table[] array, int arrayIndex) => Tables.CopyTo(array, arrayIndex);
+        public int IndexOf(Table item) => Tables.IndexOf(item);
+        public void Insert(int index, Table item) => Tables.Insert(index, item);
+        public void RemoveAt(int index) => Tables.RemoveAt(index);
+        public bool Remove(Table item) => Tables.Remove(item);
+        public IEnumerator<Table> GetEnumerator() => Tables.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => Tables.GetEnumerator();
 
     }
 }

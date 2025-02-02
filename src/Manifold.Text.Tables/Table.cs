@@ -44,7 +44,7 @@ namespace Manifold.Text.Tables
         public bool HasColumnHeaders => ColumnHeadersCount > 0;
         public string Name { get; set; } = string.Empty;
         public int RowHeadersCount { get; set; }
-        public string[][] TableRowsAndColumns { get; private set; } = Array.Empty<string[]>();
+        public string[][] TableRowsAndColumns { get; private set; } = [];
         // Private state
         private GetValueOnAxis GetNextOnAxis { get; set; }
         private SetValueOnAxis SetNextOnAxis { get; set; }
@@ -83,8 +83,7 @@ namespace Manifold.Text.Tables
         }
         public string[] GetColumn(int columnIndex, int count)
         {
-            string[] columnCells = GetColumn(columnIndex, count);
-            return columnCells;
+            throw new NotImplementedException();
         }
         public string[] GetColumn(int columnIndex, int fromRowIndex, int toRowIndex)
         {
@@ -510,17 +509,11 @@ namespace Manifold.Text.Tables
             }
 
             // Swap header counts
-            int tempColHeadersCount = ColumnHeadersCount;
-            ColumnHeadersCount = RowHeadersCount;
-            RowHeadersCount = tempColHeadersCount;
+            (RowHeadersCount, ColumnHeadersCount) = (ColumnHeadersCount, RowHeadersCount);
             // Swap data counts
-            int tempDataWidth = DataWidth;
-            DataWidth = DataHeight;
-            DataHeight = tempDataWidth;
+            (DataHeight, DataWidth) = (DataWidth, DataHeight);
             // Swap active
-            int tempActiveDataCol = ActiveDataCol;
-            ActiveDataCol = ActiveDataRow;
-            ActiveDataRow = tempActiveDataCol;
+            (ActiveDataRow, ActiveDataCol) = (ActiveDataCol, ActiveDataRow);
         }
         public bool RemoveColumn(int colIndex)
         {
@@ -692,7 +685,7 @@ namespace Manifold.Text.Tables
 
         public static Table FromArea(string[][] cells, TableArea area)
         {
-            Table table = new Table();
+            Table table = new();
 
             // Create empty table to input data into
             table.TableRowsAndColumns = ArrayUtility.DefaultArray2D(string.Empty, area.NumberOfRows, area.NumberOfCols);
@@ -719,7 +712,7 @@ namespace Manifold.Text.Tables
                 colCount = cells[row].Length > colCount ? cells[row].Length : colCount;
 
             // Set dimensions
-            Table table = new Table();
+            Table table = new();
             table.DataWidth = rowCount;
             table.DataHeight = colCount;
 
