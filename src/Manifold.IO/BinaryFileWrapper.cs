@@ -59,7 +59,7 @@ namespace Manifold.IO
         {
             if (Value == null)
             {
-                string msg = $"{nameof(Value)} is null.";
+                string msg = $"{nameof(Value)} {typeof(TBinarySerializable)} is null.";
                 throw new Exception(msg);
             }
 
