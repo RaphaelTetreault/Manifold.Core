@@ -1,11 +1,10 @@
-﻿namespace Manifold.IO
+﻿namespace Manifold.IO;
+
+/// <summary>
+///     Interface for file types.
+/// </summary>
+public interface IFileType
 {
-    /// <summary>
-    /// Interface for file types.
-    /// </summary>
-    public interface IFileType
-    {
-        string FileExtension { get; }
-        string FileName { get; set; }
-    }
+    string FileExtension { get; }
+    string FileName { get; set; }
 }

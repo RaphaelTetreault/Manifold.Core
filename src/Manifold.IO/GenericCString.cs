@@ -1,23 +1,25 @@
 ﻿using System.Text;
 
-namespace Manifold.IO
+namespace Manifold.IO;
+
+/// <summary>
+///     
+/// </summary>
+public class GenericCString : CString
 {
-    public class GenericCString : CString
+    // PROPERTIES
+    public override Encoding Encoding { get; }
+
+    // CONSTRUCTORS
+    public GenericCString(Encoding encoding) : base()
     {
-        // PROPERTIES
-        public override Encoding Encoding { get; }
-
-        // CONSTRUCTORS
-        public GenericCString(Encoding encoding) : base()
-        {
-            Encoding = encoding;
-        }
-        public GenericCString(Encoding encoding, string value) : base(value)
-        {
-            Encoding = encoding;
-        }
-
-        // OPERATORS
-        public static implicit operator string(GenericCString cstr) => cstr.Value;
+        Encoding = encoding;
     }
+    public GenericCString(Encoding encoding, string value) : base(value)
+    {
+        Encoding = encoding;
+    }
+
+    // OPERATORS
+    public static implicit operator string(GenericCString cstr) => cstr.Value;
 }

@@ -1,20 +1,22 @@
-namespace Manifold.IO
+namespace Manifold.IO;
+
+/// <summary>
+///     
+/// </summary>
+public interface IPointer
 {
-    public interface IPointer
-    {
-        /// <summary>
-        /// The address of the pointer.
-        /// </summary>
-        int Address { get; }
+    /// <summary>
+    /// The address of the pointer.
+    /// </summary>
+    int Address { get; }
 
-        /// <summary>
-        /// Checks if this pointer is not null.
-        /// </summary>
-        bool IsNotNull { get; }
+    /// <summary>
+    /// Checks if this pointer is not null.
+    /// </summary>
+    bool IsNotNull { get; }
 
-        /// <summary>
-        /// Checks if this pointer is null.
-        /// </summary>
-        bool IsNull { get; }
-    }
+    /// <summary>
+    /// Checks if this pointer is null.
+    /// </summary>
+    bool IsNull { get; }
 }

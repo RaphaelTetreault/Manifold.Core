@@ -1,8 +1,10 @@
-﻿namespace Manifold.Text.Tables
+﻿namespace Manifold.Text.Tables;
+
+/// <summary>
+///     
+/// </summary>
+public enum TableAxis
 {
-    public enum TableAxis
-    {
-        Horizontal, 
-        Vertical,
-    }
+    Horizontal, 
+    Vertical,
 }

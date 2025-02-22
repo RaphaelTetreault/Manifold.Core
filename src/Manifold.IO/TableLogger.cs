@@ -1,5 +1,8 @@
 ﻿namespace Manifold.IO;
 
+/// <summary>
+///     
+/// </summary>
 public static class TableLogger
 {
     /// <summary>

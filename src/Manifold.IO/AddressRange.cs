@@ -1,77 +1,75 @@
 using System;
 using System.IO;
 
-namespace Manifold.IO
+namespace Manifold.IO;
+
+/// <summary>
+///     Represents a start and end address range.
+/// </summary>
+public struct AddressRange
 {
+    // FIELDS
+    public long startAddress;
+    public long endAddress;
+
+
+    // PROPERTIES
     /// <summary>
-    /// Represents a start and end address range.
+    /// Creates a pointer to this address range.
     /// </summary>
-    [Serializable]
-    public struct AddressRange
+    public Pointer Pointer => new Pointer(startAddress);
+    public int Size => (int)(endAddress - startAddress);
+
+
+    // METHODS
+    public void RecordStartAddress(Stream stream)
     {
-        // FIELDS
-        public long startAddress;
-        public long endAddress;
+        startAddress = stream.Position;
+    }
+
+    public void RecordStartAddress(EndianBinaryReader reader)
+        => RecordStartAddress(reader.BaseStream);
+
+    public void RecordStartAddress(EndianBinaryWriter writer)
+        => RecordStartAddress(writer.BaseStream);
 
 
-        // PROPERTIES
-        /// <summary>
-        /// Creates a pointer to this address range.
-        /// </summary>
-        public Pointer Pointer => new Pointer(startAddress);
-        public int Size => (int)(endAddress - startAddress);
+    public void RecordEndAddress(Stream stream)
+    {
+        endAddress = stream.Position;
+    }
+
+    public void RecordEndAddress(EndianBinaryReader reader)
+        => RecordEndAddress(reader.BaseStream);
+
+    public void RecordEndAddress(EndianBinaryWriter writer)
+        => RecordEndAddress(writer.BaseStream);
 
 
-        // METHODS
-        public void RecordStartAddress(Stream stream)
-        {
-            startAddress = stream.Position;
-        }
+    public string PrintStartAddress(string prefix = "0x", string format = "x8")
+    {
+        return $"{prefix}{startAddress.ToString(format)}";
+    }
 
-        public void RecordStartAddress(EndianBinaryReader reader)
-            => RecordStartAddress(reader.BaseStream);
+    public string PrintEndAddress(string prefix = "0x", string format = "x8")
+    {
+        return $"{prefix}{endAddress.ToString(format)}";
+    }
 
-        public void RecordStartAddress(EndianBinaryWriter writer)
-            => RecordStartAddress(writer.BaseStream);
+    /// <summary>
+    ///     Retrieves bytes from address range
+    /// </summary>
+    /// <param name="reader"></param>
+    /// <returns></returns>
+    public byte[] GetBytes(EndianBinaryReader reader)
+    {
+        reader.JumpToAddress(startAddress);
+        byte[] bytes = reader.ReadBytes(Size);
+        return bytes;
+    }
 
-
-        public void RecordEndAddress(Stream stream)
-        {
-            endAddress = stream.Position;
-        }
-
-        public void RecordEndAddress(EndianBinaryReader reader)
-            => RecordEndAddress(reader.BaseStream);
-
-        public void RecordEndAddress(EndianBinaryWriter writer)
-            => RecordEndAddress(writer.BaseStream);
-
-
-        public string PrintStartAddress(string prefix = "0x", string format = "x8")
-        {
-            return $"{prefix}{startAddress.ToString(format)}";
-        }
-
-        public string PrintEndAddress(string prefix = "0x", string format = "x8")
-        {
-            return $"{prefix}{endAddress.ToString(format)}";
-        }
-
-        /// <summary>
-        ///     Retrieves bytes from address range
-        /// </summary>
-        /// <param name="reader"></param>
-        /// <returns></returns>
-        public byte[] GetBytes(EndianBinaryReader reader)
-        {
-            reader.JumpToAddress(startAddress);
-            byte[] bytes = reader.ReadBytes(Size);
-            return bytes;
-        }
-
-        public override string ToString()
-        {
-            return $"{nameof(AddressRange)}(Start: {startAddress:x8}, End: {endAddress:x8}, Size: {Size} 0x{Size:x})";
-        }
+    public override string ToString()
+    {
+        return $"{nameof(AddressRange)}(Start: {startAddress:x8}, End: {endAddress:x8}, Size: {Size} 0x{Size:x})";
     }
 }

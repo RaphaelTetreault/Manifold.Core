@@ -1,9 +1,11 @@
-namespace Manifold.IO
+namespace Manifold.IO;
+
+/// <summary>
+///     
+/// </summary>
+public static partial class ConstRegex
 {
-    public static partial class ConstRegex
-    {
-        public const string MatchIntegers = @"[0-9]+";
-        public const string MatchFloat = @"[+-]?([0-9]*[.])?[0-9]+";
-        public const string MatchWithinParenthesis = @"\(([^\)]+)\)";
-    }
+    public const string MatchIntegers = @"[0-9]+";
+    public const string MatchFloat = @"[+-]?([0-9]*[.])?[0-9]+";
+    public const string MatchWithinParenthesis = @"\(([^\)]+)\)";
 }

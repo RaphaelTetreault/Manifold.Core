@@ -1,8 +1,10 @@
-namespace Manifold.IO
+namespace Manifold.IO;
+
+/// <summary>
+///     
+/// </summary>
+public interface IPlainTextSerializable
 {
-    public interface IPlainTextSerializable
-    {
-        void Deserialize(PlainTextReader reader);
-        void Serialize(PlainTextWriter writer);
-    }
+    void Deserialize(PlainTextReader reader);
+    void Serialize(PlainTextWriter writer);
 }

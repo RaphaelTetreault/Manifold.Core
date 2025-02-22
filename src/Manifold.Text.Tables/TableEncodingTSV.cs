@@ -3,8 +3,7 @@
     public sealed class TableEncodingTSV : TableEncoding
     {
         public static readonly TableEncodingTSV Encoding = new();
-        private static readonly string[] expectedFileExtensions =
-            new string[] { ".tsv" };
+        private static readonly string[] expectedFileExtensions = [ ".tsv" ];
 
         public override string ColSeparator => "\t";
         public override string RowSeparator => "\n";

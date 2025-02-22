@@ -1,11 +1,13 @@
 ﻿// Resource for those new to endianness.
 // https://en.wikipedia.org/wiki/Endianness
 
-namespace Manifold.IO
+namespace Manifold.IO;
+
+/// <summary>
+///     
+/// </summary>
+public enum Endianness : byte
 {
-    public enum Endianness : byte
-    {
-        BigEndian = 0,
-        LittleEndian = 1,
-    }
+    BigEndian = 0,
+    LittleEndian = 1,
 }

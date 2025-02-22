@@ -1,8 +1,10 @@
-﻿namespace Manifold.IO
+﻿namespace Manifold.IO;
+
+/// <summary>
+///     Indicates this type is a binary file.
+/// </summary>
+public interface IBinaryFileType : 
+    IFileType
 {
-    public interface IBinaryFileType : 
-        IFileType
-    {
-        Endianness Endianness { get; }
-    }
+    Endianness Endianness { get; }
 }

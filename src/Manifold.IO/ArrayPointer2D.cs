@@ -1,85 +1,83 @@
-namespace Manifold.IO
+namespace Manifold.IO;
+
+/// <summary>
+///     
+/// </summary>
+/// <remarks>
+///     Given a 2D array size [n,m]; the underlying binary is represented as 'n' lengths followed after
+///     by 'n' pointers. Once paired, the length and pointer form an <cref>ArrayPointer</cref>.
+/// </remarks>
+public sealed class ArrayPointer2D :
+    IBinaryAddressable,
+    IBinarySerializable
 {
-    /// <summary>
-    /// 
-    /// </summary>
-    /// <remarks>
-    /// Given a 2D array size [n,m]; the underlying binary is represented as 'n' lengths followed after
-    /// by 'n' pointers. Once paired, the length and pointer form an <cref>ArrayPointer</cref>.
-    /// </remarks>
-    [System.Serializable]
-    public sealed class ArrayPointer2D :
-        IBinaryAddressable,
-        IBinarySerializable
+    // FIELDS
+    private ArrayPointer[] arrayPointers;
+
+
+    // CONSTRUCTORS
+    public ArrayPointer2D(int length = 0)
     {
-        // FIELDS
-        private ArrayPointer[] arrayPointers;
-
-
-        // CONSTRUCTORS
-        public ArrayPointer2D(int length = 0)
-        {
-            AddressRange = new AddressRange();
-            arrayPointers = new ArrayPointer[length];
-        }
-        public ArrayPointer2D(ArrayPointer[] arrayPointers)
-        {
-            AddressRange = new AddressRange();
-            this.arrayPointers = arrayPointers;
-        }
-
-
-        // INDEXERS
-        public ArrayPointer this[int index] { get => arrayPointers[index]; set => arrayPointers[index] = value; }
-
-        // PROPERTIES
-        public AddressRange AddressRange { get; set; }
-        public ArrayPointer[] ArrayPointers { get => arrayPointers; set => arrayPointers = value; }
-        public int Length => arrayPointers.Length;
-
-
-        // METHODS
-        public void Deserialize(EndianBinaryReader reader)
-        {
-            this.RecordStartAddress(reader);
-            {
-                // Read array lengths
-                for (int i = 0; i < arrayPointers.Length; i++)
-                {
-                    int length = 0;
-                    reader.Read(ref length);
-                    arrayPointers[i].length = length;
-                }
-
-                // Read array addresses
-                for (int i = 0; i < arrayPointers.Length; i++)
-                {
-                    int address = 0;
-                    reader.Read(ref address);
-                    arrayPointers[i].address = address;
-                }
-            }
-            this.RecordEndAddress(reader);
-        }
-
-        public void Serialize(EndianBinaryWriter writer)
-        {
-            this.RecordStartAddress(writer);
-            {
-                // Write array lengths
-                for (int i = 0; i < arrayPointers.Length; i++)
-                {
-                    writer.Write(arrayPointers[i].length);
-                }
-
-                // Write array addresses
-                for (int i = 0; i < arrayPointers.Length; i++)
-                {
-                    writer.Write(arrayPointers[i].address);
-                }
-            }
-            this.RecordEndAddress(writer);
-        }
-
+        AddressRange = new AddressRange();
+        arrayPointers = new ArrayPointer[length];
     }
+    public ArrayPointer2D(ArrayPointer[] arrayPointers)
+    {
+        AddressRange = new AddressRange();
+        this.arrayPointers = arrayPointers;
+    }
+
+
+    // INDEXERS
+    public ArrayPointer this[int index] { get => arrayPointers[index]; set => arrayPointers[index] = value; }
+
+    // PROPERTIES
+    public AddressRange AddressRange { get; set; }
+    public ArrayPointer[] ArrayPointers { get => arrayPointers; set => arrayPointers = value; }
+    public int Length => arrayPointers.Length;
+
+
+    // METHODS
+    public void Deserialize(EndianBinaryReader reader)
+    {
+        this.RecordStartAddress(reader);
+        {
+            // Read array lengths
+            for (int i = 0; i < arrayPointers.Length; i++)
+            {
+                int length = 0;
+                reader.Read(ref length);
+                arrayPointers[i].length = length;
+            }
+
+            // Read array addresses
+            for (int i = 0; i < arrayPointers.Length; i++)
+            {
+                int address = 0;
+                reader.Read(ref address);
+                arrayPointers[i].address = address;
+            }
+        }
+        this.RecordEndAddress(reader);
+    }
+
+    public void Serialize(EndianBinaryWriter writer)
+    {
+        this.RecordStartAddress(writer);
+        {
+            // Write array lengths
+            for (int i = 0; i < arrayPointers.Length; i++)
+            {
+                writer.Write(arrayPointers[i].length);
+            }
+
+            // Write array addresses
+            for (int i = 0; i < arrayPointers.Length; i++)
+            {
+                writer.Write(arrayPointers[i].address);
+            }
+        }
+        this.RecordEndAddress(writer);
+    }
+
 }

@@ -3,164 +3,166 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 
-namespace Manifold.IO
+namespace Manifold.IO;
+
+/// <summary>
+///     
+/// </summary>
+public static class BinarySerializableIO
 {
-    public static class BinarySerializableIO
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TBinarySerializable"></typeparam>
+    /// <param name="filePath"></param>
+    /// <returns></returns>
+    public static TBinarySerializable LoadFile<TBinarySerializable>(string filePath)
+        where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TBinarySerializable"></typeparam>
-        /// <param name="filePath"></param>
-        /// <returns></returns>
-        public static TBinarySerializable LoadFile<TBinarySerializable>(string filePath)
-            where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
+        var binarySerializable = new TBinarySerializable();
+        var endianness = binarySerializable.Endianness;
+        using (var reader = new EndianBinaryReader(File.OpenRead(filePath), endianness))
         {
-            var binarySerializable = new TBinarySerializable();
-            var endianness = binarySerializable.Endianness;
-            using (var reader = new EndianBinaryReader(File.OpenRead(filePath), endianness))
-            {
-                binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
-                binarySerializable.Deserialize(reader);
-            }
+            binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
+            binarySerializable.Deserialize(reader);
+        }
+        return binarySerializable;
+    }
+
+    /// <summary>
+    /// Loads file at and stores valie in <paramref name="binarySerializable"/> without creating a new instance.
+    /// </summary>
+    /// <typeparam name="TBinarySerializable">A type implementing the IBinarySerialize and IBinaryFileType interface.</typeparam>
+    /// <param name="filePath">The file path to load from.</param>
+    /// <param name="binarySerializable">The instance to deserialize the file to.</param>
+    /// <returns></returns>
+    public static TBinarySerializable LoadFile<TBinarySerializable>(string filePath, TBinarySerializable binarySerializable)
+        where TBinarySerializable : IBinarySerializable, IBinaryFileType
+    {
+        var endianness = binarySerializable.Endianness;
+        using (var reader = new EndianBinaryReader(File.OpenRead(filePath), endianness))
+        {
+            binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
+            binarySerializable.Deserialize(reader);
             return binarySerializable;
         }
+    }
 
-        /// <summary>
-        /// Loads file at and stores valie in <paramref name="binarySerializable"/> without creating a new instance.
-        /// </summary>
-        /// <typeparam name="TBinarySerializable">A type implementing the IBinarySerialize and IBinaryFileType interface.</typeparam>
-        /// <param name="filePath">The file path to load from.</param>
-        /// <param name="binarySerializable">The instance to deserialize the file to.</param>
-        /// <returns></returns>
-        public static TBinarySerializable LoadFile<TBinarySerializable>(string filePath, TBinarySerializable binarySerializable)
-            where TBinarySerializable : IBinarySerializable, IBinaryFileType
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TBinarySerializable"></typeparam>
+    /// <param name="filePaths"></param>
+    /// <param name="binarySerializables"></param>
+    /// <returns></returns>
+    /// <exception cref="ArgumentException"></exception>
+    public static IEnumerable<TBinarySerializable> LoadFile<TBinarySerializable>(string[] filePaths, TBinarySerializable[] binarySerializables)
+        where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
+    {
+        // Make sure arays are same length
+        if (filePaths.Length != binarySerializables.Length)
+            throw new ArgumentException($"{nameof(filePaths)} and {nameof(binarySerializables)} must have the same length.");
+
+        // Make sure binarySerializables passed in are not null
+        foreach (var binarySerializable in binarySerializables)
+            if (binarySerializable is null)
+                throw new ArgumentException($"All instances in {nameof(binarySerializables)} must not be null.");
+
+        // Load
+        for (int i = 0; i < filePaths.Length; i++)
         {
-            var endianness = binarySerializable.Endianness;
-            using (var reader = new EndianBinaryReader(File.OpenRead(filePath), endianness))
+            var value = LoadFile(filePaths[i], binarySerializables[i]);
+            yield return value;
+        }
+
+    }
+
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TBinarySerializable"></typeparam>
+    /// <param name="filePaths"></param>
+    /// <returns></returns>
+    public static IEnumerable<TBinarySerializable> LoadFile<TBinarySerializable>(params string[] filePaths)
+        where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
+    {
+        foreach (string filePath in filePaths)
+        {
+            var value = LoadFile<TBinarySerializable>(filePath);
+            yield return value;
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TBinarySerializable"></typeparam>
+    /// <param name="binarySerializable"></param>
+    /// <param name="filePath"></param>
+    public static void SaveFile<TBinarySerializable>(TBinarySerializable binarySerializable, string filePath)
+        where TBinarySerializable : IBinarySerializable, IBinaryFileType
+    {
+        var endianness = binarySerializable.Endianness;
+        using (var writer = new EndianBinaryWriter(File.Create(filePath), endianness))
+        {
+            binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
+            binarySerializable.Serialize(writer);
+        }
+    }
+
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TBinarySerializable"></typeparam>
+    /// <param name="rootPath"></param>
+    /// <param name="binarySerializables"></param>
+    /// <returns></returns>
+    /// <exception cref="NullReferenceException"></exception>
+    /// <exception cref="IOException"></exception>
+    public static IEnumerable SaveFile<TBinarySerializable>(string rootPath, TBinarySerializable[] binarySerializables)
+        where TBinarySerializable : IBinarySerializable, IBinaryFileType
+    {
+        // Do a sanity check on parameters before serializing
+        foreach (var binarySerializable in binarySerializables)
+        {
+            if (binarySerializable is null)
             {
-                binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
-                binarySerializable.Deserialize(reader);
-                return binarySerializable;
+                var msg = "Cannot serialize null value!";
+                throw new NullReferenceException(msg);
+            }
+
+            if (string.IsNullOrEmpty(binarySerializable.FileName))
+            {
+                var msg = $"Cannot serialize without a filename! (Assign name to {nameof(binarySerializable.FileName)})";
+                throw new IOException(msg);
             }
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TBinarySerializable"></typeparam>
-        /// <param name="filePaths"></param>
-        /// <param name="binarySerializables"></param>
-        /// <returns></returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static IEnumerable<TBinarySerializable> LoadFile<TBinarySerializable>(string[] filePaths, TBinarySerializable[] binarySerializables)
-            where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
+        foreach (var binarySerializable in binarySerializables)
         {
-            // Make sure arays are same length
-            if (filePaths.Length != binarySerializables.Length)
-                throw new ArgumentException($"{nameof(filePaths)} and {nameof(binarySerializables)} must have the same length.");
-
-            // Make sure binarySerializables passed in are not null
-            foreach (var binarySerializable in binarySerializables)
-                if (binarySerializable is null)
-                    throw new ArgumentException($"All instances in {nameof(binarySerializables)} must not be null.");
-
-            // Load
-            for (int i = 0; i < filePaths.Length; i++)
-            {
-                var value = LoadFile(filePaths[i], binarySerializables[i]);
-                yield return value;
-            }
-
+            var fileName = binarySerializable.FileName + binarySerializable.FileExtension;
+            var filePath = Path.Combine(rootPath, fileName);
+            SaveFile(binarySerializable, filePath);
+            yield return null;
         }
+    }
 
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TBinarySerializable"></typeparam>
-        /// <param name="filePaths"></param>
-        /// <returns></returns>
-        public static IEnumerable<TBinarySerializable> LoadFile<TBinarySerializable>(params string[] filePaths)
-            where TBinarySerializable : IBinarySerializable, IBinaryFileType, new()
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <typeparam name="TBinarySerializable"></typeparam>
+    /// <param name="binarySerializable"></param>
+    /// <param name="filePath"></param>
+    public static void SaveTo<TBinarySerializable>(TBinarySerializable binarySerializable, Stream destination)
+        where TBinarySerializable : IBinarySerializable, IBinaryFileType
+    {
+        var endianness = binarySerializable.Endianness;
+        using (var writer = new EndianBinaryWriter(destination, endianness))
         {
-            foreach (string filePath in filePaths)
-            {
-                var value = LoadFile<TBinarySerializable>(filePath);
-                yield return value;
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TBinarySerializable"></typeparam>
-        /// <param name="binarySerializable"></param>
-        /// <param name="filePath"></param>
-        public static void SaveFile<TBinarySerializable>(TBinarySerializable binarySerializable, string filePath)
-            where TBinarySerializable : IBinarySerializable, IBinaryFileType
-        {
-            var endianness = binarySerializable.Endianness;
-            using (var writer = new EndianBinaryWriter(File.Create(filePath), endianness))
-            {
-                binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
-                binarySerializable.Serialize(writer);
-            }
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TBinarySerializable"></typeparam>
-        /// <param name="rootPath"></param>
-        /// <param name="binarySerializables"></param>
-        /// <returns></returns>
-        /// <exception cref="NullReferenceException"></exception>
-        /// <exception cref="IOException"></exception>
-        public static IEnumerable SaveFile<TBinarySerializable>(string rootPath, TBinarySerializable[] binarySerializables)
-            where TBinarySerializable : IBinarySerializable, IBinaryFileType
-        {
-            // Do a sanity check on parameters before serializing
-            foreach (var binarySerializable in binarySerializables)
-            {
-                if (binarySerializable is null)
-                {
-                    var msg = "Cannot serialize null value!";
-                    throw new NullReferenceException(msg);
-                }
-
-                if (string.IsNullOrEmpty(binarySerializable.FileName))
-                {
-                    var msg = $"Cannot serialize without a filename! (Assign name to {nameof(binarySerializable.FileName)})";
-                    throw new IOException(msg);
-                }
-            }
-
-            foreach (var binarySerializable in binarySerializables)
-            {
-                var fileName = binarySerializable.FileName + binarySerializable.FileExtension;
-                var filePath = Path.Combine(rootPath, fileName);
-                SaveFile(binarySerializable, filePath);
-                yield return null;
-            }
-        }
-
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TBinarySerializable"></typeparam>
-        /// <param name="binarySerializable"></param>
-        /// <param name="filePath"></param>
-        public static void SaveTo<TBinarySerializable>(TBinarySerializable binarySerializable, Stream destination)
-            where TBinarySerializable : IBinarySerializable, IBinaryFileType
-        {
-            var endianness = binarySerializable.Endianness;
-            using (var writer = new EndianBinaryWriter(destination, endianness))
-            {
-                //binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
-                binarySerializable.Serialize(writer);
-            }
+            //binarySerializable.FileName = Path.GetFileNameWithoutExtension(filePath);
+            binarySerializable.Serialize(writer);
         }
     }
 }

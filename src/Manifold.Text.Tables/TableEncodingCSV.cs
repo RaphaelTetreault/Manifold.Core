@@ -1,13 +1,14 @@
-﻿namespace Manifold.Text.Tables
-{
-    public sealed class TableEncodingCSV : TableEncoding
-    {
-        private static readonly string[] expectedFileExtensions =
-            new string[] { ".csv" };
+﻿namespace Manifold.Text.Tables;
 
-        public override string ColSeparator => ",";
-        public override string RowSeparator => "\n";
-        public override string DefaultFileExtension => ".csv";
-        public override string[] ExpectedFileExtensions => expectedFileExtensions;
-    }
+/// <summary>
+///     
+/// </summary>
+public sealed class TableEncodingCSV : TableEncoding
+{
+    private static readonly string[] expectedFileExtensions = [ ".csv" ];
+
+    public override string ColSeparator => ",";
+    public override string RowSeparator => "\n";
+    public override string DefaultFileExtension => ".csv";
+    public override string[] ExpectedFileExtensions => expectedFileExtensions;
 }
