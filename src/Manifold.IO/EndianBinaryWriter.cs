@@ -112,6 +112,8 @@ public class EndianBinaryWriter : BinaryWriter
     public override void Write(char[] chars) => base.Write(chars);
     public override void Write(char[] chars, int index, int count) => base.Write(chars, index, count);
     public override void Write(ReadOnlySpan<char> chars) => base.Write(chars);
+    // Required to prevent overload priority from picking 'string' serialization for CString-derived types.
+    public void Write(CString cString) => cString.Serialize(this);
     public void Write(string[] value, Encoding encoding)
     {
         foreach (string str in value)
@@ -296,7 +298,6 @@ public class EndianBinaryWriter : BinaryWriter
         foreach (var item in value)
             serializeMethod(item);
     }
-
 
 }
 
