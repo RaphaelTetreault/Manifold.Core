@@ -466,6 +466,37 @@ public class EndianBinaryReader : BinaryReader
     public float PeekFloat() => PeekValue(fReadFloat);
     public double PeekDouble() => PeekValue(fReadDouble);
     public decimal PeekDecimal() => PeekValue(ReadDecimal);
+
+
+    // Testing to see if this is useful
+    public void AssertValue<T>(Func<T> readFunction, T expectedValue)
+        where T : IEquatable<T>
+    {
+        T value = readFunction.Invoke();
+        if (!value.Equals(expectedValue))
+        {
+            string msg = $"Assert failed. {value} != {expectedValue}";
+            throw new Assert.AssertException(msg);
+        }
+    }
+    public void AssertRead(bool expectedValue) => AssertValue(ReadBool, expectedValue);
+    public void AssertRead(byte expectedValue) => AssertValue(ReadUInt8, expectedValue);
+    public void AssertRead(ushort expectedValue) => AssertValue(ReadUInt16, expectedValue);
+    public void AssertRead(uint expectedValue) => AssertValue(ReadUInt32, expectedValue);
+    public void AssertRead(ulong expectedValue) => AssertValue(ReadUInt64, expectedValue);
+    public void AssertRead(UInt128 expectedValue) => AssertValue(ReadUInt128, expectedValue);
+    public void AssertRead(sbyte expectedValue) => AssertValue(ReadInt8, expectedValue);
+    public void AssertRead(short expectedValue) => AssertValue(ReadInt16, expectedValue);
+    public void AssertRead(int expectedValue) => AssertValue(ReadInt32, expectedValue);
+    public void AssertRead(long expectedValue) => AssertValue(ReadInt64, expectedValue);
+    public void AssertRead(Int128 expectedValue) => AssertValue(ReadInt128, expectedValue);
+    public void AssertRead(Half expectedValue) => AssertValue(ReadHalf, expectedValue);
+    public void AssertRead(float expectedValue) => AssertValue(ReadFloat, expectedValue);
+    public void AssertRead(double expectedValue) => AssertValue(ReadDouble, expectedValue);
+    public void AssertRead(decimal expectedValue) => AssertValue(ReadDecimal, expectedValue);
+    public void AssertRead(char expectedValue) => AssertValue(ReadChar, expectedValue);
+    // TODO: make own function to use encoding and length
+    //public void AssertRead(string expectedValue) => AssertValue(ReadString, expectedValue);
 }
 
 public static class EndianBinaryReaderCompilerWorkaround
