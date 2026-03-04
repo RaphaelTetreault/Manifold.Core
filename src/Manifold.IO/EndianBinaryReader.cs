@@ -143,25 +143,24 @@ public class EndianBinaryReader : BinaryReader
     public TEnum ReadEnum<TEnum>() where TEnum : Enum
     {
         var typeCode = ((TEnum)Enum.ToObject(typeof(TEnum), 0)).GetTypeCode();
-        switch (typeCode)
+        return typeCode switch
         {
             // Ordered by my best guess as to which is most common
             // int is the default backing type
-            case TypeCode.Int32: return (TEnum)(object)ReadInt32();
+            TypeCode.Int32 => (TEnum)(object)ReadInt32(),
             // I often override the backing type to not have negatives
-            case TypeCode.UInt32: return (TEnum)(object)ReadUInt32();
-            // byte and ushort are smaller/compress enums (also no negatives
-            case TypeCode.Byte: return (TEnum)(object)ReadUInt8();
-            case TypeCode.UInt16: return (TEnum)(object)ReadUInt16();
+            TypeCode.UInt32 => (TEnum)(object)ReadUInt32(),
+            // byte and ushort are smaller/compressed enums (also no negatives)
+            TypeCode.Byte => (TEnum)(object)ReadUInt8(),
+            TypeCode.UInt16 => (TEnum)(object)ReadUInt16(),
             // Unlikely but perhaps userful to have 64 bits to work with
-            case TypeCode.UInt64: return (TEnum)(object)ReadUInt64();
+            TypeCode.UInt64 => (TEnum)(object)ReadUInt64(),
             // These are unordered: I know I don't use them as backing types
-            case TypeCode.SByte: return (TEnum)(object)ReadInt8();
-            case TypeCode.Int16: return (TEnum)(object)ReadInt16();
-            case TypeCode.Int64: return (TEnum)(object)ReadInt64();
-
-            default: throw new NotImplementedException("Unsupported Enum backing type used!");
-        }
+            TypeCode.SByte => (TEnum)(object)ReadInt8(),
+            TypeCode.Int16 => (TEnum)(object)ReadInt16(),
+            TypeCode.Int64 => (TEnum)(object)ReadInt64(),
+            _ => throw new NotImplementedException("Unsupported Enum backing type used!"),
+        };
     }
     /// <summary>
     /// Read <paramref name="count"/> bytes from base stream. All bytes will be reversed
