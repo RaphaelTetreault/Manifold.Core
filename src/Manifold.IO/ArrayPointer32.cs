@@ -10,6 +10,8 @@ public struct ArrayPointer32 :
     IBinarySerializable,
     IPointer
 {
+    public static readonly ArrayPointer32 Null = new(0, 0);
+
     // FIELDS
     public int length;
     public int address;
