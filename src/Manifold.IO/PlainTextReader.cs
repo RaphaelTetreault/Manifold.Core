@@ -24,6 +24,8 @@ public class PlainTextReader : IDisposable
     {
         List<string> lines = new(listCapacity);
         using StreamReader reader = new(stream);
+        // Seek begining, read all lines
+        reader.BaseStream.Position = 0;
         while (!reader.EndOfStream)
         {
             string line = reader.ReadLine()!;
@@ -123,10 +125,8 @@ public class PlainTextReader : IDisposable
         }
 
         // Indicate no valid line could be read
-        {
-            string msg = "No value-based line remaining in file.";
-            throw new EndOfStreamException(msg);
-        }
+        string msg = "No value-based line remaining in file.";
+        throw new EndOfStreamException(msg);
     }
 
     private string ReadValueIndented()
@@ -192,23 +192,22 @@ public class PlainTextReader : IDisposable
     public void ReadValue<TEnum>(ref TEnum value, byte _ = 0)
         where TEnum : struct, Enum
     {
-        TEnum ParseEnum(string str)
+        ReadValue(ref value, ParseEnum);
+        static TEnum ParseEnum(string str)
         {
             return Enum.Parse<TEnum>(str, true);
-        };
-        ReadValue(ref value, ParseEnum);
-
+        }
     }
     public void ReadValue<TPlainTextSerializable>(ref TPlainTextSerializable value)
         where TPlainTextSerializable : IPlainTextSerializable, new()
     {
+        ReadValue(ref value, ParsePlainTextSerializable);
         TPlainTextSerializable ParsePlainTextSerializable(string str)
         {
             var textSerializable = new TPlainTextSerializable();
             textSerializable.Deserialize(this);
             return textSerializable;
-        };
-        ReadValue(ref value, ParsePlainTextSerializable);
+        }   
     }
     public void DerializeIndented<TPlainTextSerializable>(TPlainTextSerializable serializable)
         where TPlainTextSerializable : IPlainTextSerializable
@@ -219,5 +218,6 @@ public class PlainTextReader : IDisposable
     public void Dispose()
     {
         // "Fake" implementation to stay consistent with Writer
+        GC.SuppressFinalize(this);
     }
 }
