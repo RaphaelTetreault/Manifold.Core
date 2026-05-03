@@ -12,13 +12,19 @@ public struct AddressRange
     public long startAddress;
     public long endAddress;
 
+    public AddressRange() { }
+    public AddressRange(long startAddress, long endAddress)
+    {
+        this.startAddress = startAddress;
+        this.endAddress = endAddress;
+    }
 
     // PROPERTIES
     /// <summary>
     /// Creates a pointer to this address range.
     /// </summary>
-    public Pointer Pointer => new Pointer(startAddress);
-    public int Size => (int)(endAddress - startAddress);
+    public readonly Pointer Pointer => startAddress;
+    public readonly int Size => (int)(endAddress - startAddress);
 
 
     // METHODS
@@ -46,12 +52,12 @@ public struct AddressRange
         => RecordEndAddress(writer.BaseStream);
 
 
-    public string PrintStartAddress(string prefix = "0x", string format = "x8")
+    public readonly string PrintStartAddress(string prefix = "0x", string format = "x8")
     {
         return $"{prefix}{startAddress.ToString(format)}";
     }
 
-    public string PrintEndAddress(string prefix = "0x", string format = "x8")
+    public readonly string PrintEndAddress(string prefix = "0x", string format = "x8")
     {
         return $"{prefix}{endAddress.ToString(format)}";
     }
@@ -60,16 +66,31 @@ public struct AddressRange
     ///     Retrieves bytes from address range
     /// </summary>
     /// <param name="reader"></param>
-    /// <returns></returns>
-    public byte[] GetBytes(EndianBinaryReader reader)
+    /// <returns>
+    ///     
+    /// </returns>
+    public readonly byte[] GetBytes(EndianBinaryReader reader)
     {
         reader.JumpToAddress(startAddress);
         byte[] bytes = reader.ReadBytes(Size);
         return bytes;
     }
 
-    public override string ToString()
+    public override readonly string ToString()
     {
         return $"{nameof(AddressRange)}(Start: {startAddress:x8}, End: {endAddress:x8}, Size: {Size} 0x{Size:x})";
+    }
+
+    public readonly Range ToRange()
+    {
+        int start = (int)startAddress;
+        int end = (int)endAddress;
+        Range range = new(start, end);
+        return range;
+    }
+
+    public static implicit operator Range(AddressRange addressRange)
+    {
+        return addressRange.ToRange();
     }
 }
