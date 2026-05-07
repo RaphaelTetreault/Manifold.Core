@@ -1,9 +1,35 @@
 using System;
+using System.Collections.Generic;
 
 namespace Manifold;
 
 public static class ArrayExtensions
 {
+    public readonly record struct ArrayItem<T>(int Index, T Value);
+
+    // TODO: ReadOnlySpace?
+    // TODO: move to collectiosn extensions class?
+    public static IEnumerable<ArrayItem<T>> Iterate<T>(this T[] values, out int length)
+    {
+        if (values is null)
+        {
+            length = 0;
+            return [];
+        }
+        else
+        {
+            length = values.Length;
+            return Iterate(values);
+        }
+    }
+
+    public static IEnumerable<ArrayItem<T>> Iterate<T>(this T[] values)
+    {
+        if (values is not null)
+            for (int index = 0; index < values.Length; index++)
+                yield return new(index, values[index]);
+    }
+
     // https://stackoverflow.com/questions/8560106/isnullorempty-equivalent-for-array-c-sharp
     /// <summary>
     ///     Indicates whether the specified array is null or has a length of zero.
