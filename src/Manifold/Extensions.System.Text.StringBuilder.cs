@@ -12,7 +12,7 @@ public static class StringBuilderExtension
         return $"{typeof(T).Name} (null)";
     }
 
-    public static void AppendMultiLineIndented<TextPrintable>(this StringBuilder stringBuilder, string indent, int indentLevel, TextPrintable textPrintable)
+    public static void AppendMultiLineIndented<TextPrintable>(this StringBuilder stringBuilder, string indent, int indentLevel, TextPrintable? textPrintable)
         where TextPrintable : ITextPrintable
     {
         if (textPrintable is null)
@@ -21,7 +21,7 @@ public static class StringBuilderExtension
             textPrintable.PrintMultiLine(stringBuilder, indentLevel, indent);
     }
 
-    public static void AppendMultiLineIndented<TextPrintable>(this StringBuilder stringBuilder, string indent, int indentLevel, TextPrintable[] textPrintables)
+    public static void AppendMultiLineIndented<TextPrintable>(this StringBuilder stringBuilder, string indent, int indentLevel, TextPrintable[]? textPrintables)
         where TextPrintable : ITextPrintable
     {
         if (textPrintables is null)

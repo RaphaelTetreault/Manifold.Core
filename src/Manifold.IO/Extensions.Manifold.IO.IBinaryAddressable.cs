@@ -78,7 +78,7 @@ public static class IBinaryAddressableExtensions
     /// </summary>
     /// <param name="value">The value to get the pointer from.</param>
     /// <returns></returns>
-    public static Pointer GetPointer<TBinaryAddressable>(this TBinaryAddressable value)
+    public static Pointer GetPointer<TBinaryAddressable>(this TBinaryAddressable? value)
         where TBinaryAddressable : IBinaryAddressable
     {
         if (value is null)
@@ -93,7 +93,7 @@ public static class IBinaryAddressableExtensions
     /// </summary>
     /// <param name="values">The values to get the pointer base from.</param>
     /// <returns></returns>
-    public static Pointer GetBasePointer<TBinaryAddressable>(this TBinaryAddressable[] values)
+    public static Pointer GetBasePointer<TBinaryAddressable>(this TBinaryAddressable[]? values)
         where TBinaryAddressable : IBinaryAddressable
     {
         // Return null pointer if null OR if array empty. Perfect!
@@ -116,7 +116,7 @@ public static class IBinaryAddressableExtensions
     /// </summary>
     /// <param name="values">The values to get pointers from.</param>
     /// <returns></returns>
-    public static Pointer[] GetPointers<TBinaryAddressable>(this TBinaryAddressable[] values)
+    public static Pointer[] GetPointers<TBinaryAddressable>(this TBinaryAddressable[]? values)
         where TBinaryAddressable : IBinaryAddressable
     {
         // Since we want a pointer for each thing, throw an error since

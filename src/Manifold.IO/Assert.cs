@@ -41,7 +41,7 @@ public static class Assert
     }
 
 
-    public static void ValidateReferencePointer(object reference, IPointer pointer)
+    public static void ValidateReferencePointer(object? reference, IPointer pointer)
     {
         bool referenceIsNull = reference == null;
         // There is an issue if one of the two are set, but when both are the same, no issue
@@ -56,7 +56,7 @@ public static class Assert
     }
 
 
-    public static void ReferencePointer(IBinaryAddressable reference, IPointer pointer)
+    public static void ReferencePointer(IBinaryAddressable? reference, IPointer pointer)
     {
         // Validates reference-pointer null/instance connection
         ValidateReferencePointer(reference, pointer);
@@ -71,7 +71,7 @@ public static class Assert
         }
     }
 
-    public static void ReferencePointer(IBinaryAddressable[] reference, ArrayPointer pointer)
+    public static void ReferencePointer(IBinaryAddressable[]? reference, ArrayPointer pointer)
     {
         // Validates reference-pointer null/instance connection
         ValidateReferencePointer(reference, pointer);
