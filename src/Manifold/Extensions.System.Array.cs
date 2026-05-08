@@ -7,8 +7,8 @@ public static class ArrayExtensions
 {
     public readonly record struct ArrayItem<T>(int Index, T Value);
 
-    // TODO: ReadOnlySpace?
-    // TODO: move to collectiosn extensions class?
+    // TODO: ReadOnlySpan?
+    // TODO: move to collections extensions class?
     public static IEnumerable<ArrayItem<T>> Iterate<T>(this T[] values, out int length)
     {
         if (values is null)
