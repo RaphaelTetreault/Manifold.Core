@@ -35,4 +35,28 @@ public static partial class BinaryWriterExtensions
         writer.Write(value.Z);
         writer.Write(value.X);
     }
+
+    public static void Write(this EndianBinaryWriter writer, Vector2[] values)
+    {
+        foreach (var value in values)
+            writer.Write(value);
+    }
+
+    public static void Write(this EndianBinaryWriter writer, Vector3[] values)
+    {
+        foreach (var value in values)
+            writer.Write(value);
+    }
+
+    public static void Write(this EndianBinaryWriter writer, Vector4[] values)
+    {
+        foreach (var value in values)
+            writer.Write(value);
+    }
+
+    public static void Write(this EndianBinaryWriter writer, Quaternion[] values)
+    {
+        foreach (var value in values)
+            writer.Write(value);
+    }
 }
